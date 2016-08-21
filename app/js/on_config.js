@@ -8,15 +8,14 @@ function OnConfig($stateProvider, $locationProvider, $urlRouterProvider, $compil
   $locationProvider.html5Mode(true);
 
   $stateProvider
-  .state('Home', {
+  .state('market-browser', {
     url: '/',
-    controller: 'ExampleCtrl as home',
-    templateUrl: 'home.html',
-    title: 'Home'
+    templateUrl: 'market-browser/market-browser-tpl.html',
+    controller: 'marketBrowserController as marketBrowserCtrl',
+    title: 'Market Browser'
   });
 
   $urlRouterProvider.otherwise('/');
-
 }
 
 export default OnConfig;

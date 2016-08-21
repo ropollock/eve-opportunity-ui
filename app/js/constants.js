@@ -1,6 +1,7 @@
 const AppSettings = {
-  appTitle: 'Example Application',
-  apiUrl: '/api/v1'
+  appTitle: 'Eve Opportunity',
+  apiUrl: '/api/v1',
+  crestUrl: ''
 };
 
 export default AppSettings;

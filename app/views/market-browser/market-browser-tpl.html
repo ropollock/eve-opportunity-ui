@@ -1,0 +1,51 @@
+<div class="container">
+    <!--<div class="row">
+        <div class="col-md-12">
+            <h4><i class="fa fa-search"></i> Market</h4>
+        </div>
+    </div>-->
+    <form ng-submit="form.analysis()" name="searchForm">
+    <div class="row">
+        <div class="col-md-6">
+            <md-autocomplete spellcheck="false" md-selected-item-change="form.analysis()" flex="" required="true" md-select-on-match="true" md-autoselect="true" md-no-cache="form.autocompleteNoCache" md-input-name="regionAutoComplete" md-input-minlength="3" md-selected-item="form.selectedRegion" md-search-text="form.regionSearchText" md-items="item in form.queryRegions(form.regionSearchText)" md-item-text="item.name" md-floating-label="Region">
+                <md-item-template>
+                    <span md-highlight-text="form.regionSearchText">{{item.name}}</span>
+                </md-item-template>
+                <div ng-messages="searchForm.regionAutoComplete.$error" ng-if="searchForm.regionAutoComplete.$touched">
+                    <div ng-message="required">Select a region!</div>
+                    <div ng-message="minlength">Your entry is not long enough.</div>
+                </div>
+            </md-autocomplete>
+
+        </div>
+        <div class="col-md-6">
+            <md-autocomplete spellcheck="false" md-selected-item-change="form.analysis()" flex="" required="true" md-select-on-match="true" md-autoselect="true" md-no-cache="form.autocompleteNoCache" md-input-name="itemAutoComplete" md-input-minlength="3" md-selected-item="form.selectedItem" md-search-text="form.itemSearchText" md-items="item in form.queryItems(form.itemSearchText)" md-item-text="item.name" md-floating-label="Item">
+                <md-item-template>
+                    <span md-highlight-text="form.itemSearchText">{{item.name}}</span>
+                </md-item-template>
+                <div ng-messages="searchForm.itemAutoComplete.$error" ng-if="searchForm.itemAutoComplete.$touched">
+                    <div ng-message="required">Select an item!</div>
+                    <div ng-message="minlength">Your entry is not long enough.</div>
+                </div>
+            </md-autocomplete>
+        </div>
+    </div>
+    <!--<div class="row">
+        <div class="col-md-2">
+            <md-button ng-click="form.analysis()" class="md-raised md-primary">Search</md-button>
+        </div>
+    </div>-->
+    </form>
+    <div class="row" data-ng-if="form.loading">
+        <div class="col-md-2 col-md-offset-5">
+            <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+        </div>
+    </div>
+    <!--<div class="row shadow-sm" data-ng-if="!form.loading && analysis.priceHistory.data">
+        <div class="col-md-12">
+            <div price-history history="analysis.priceHistory.charts">
+
+            </div>
+        </div>
+    </div>-->
+</div>

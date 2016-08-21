@@ -1,3 +1,5 @@
+@import "bootstrap";
+@import "angular-material";
 @import 'vars';
 @import 'typography';
 
@@ -6,4 +8,176 @@ body {
   color: $font-color--dark;
   background-color: $background--light;
   padding: $half-space;
+}
+
+html {
+  min-height: 100%;
+}
+
+body {
+  height: 100%;
+  font-family: 'Droid Sans', Helvetica, Arial, sans-serif;
+  color: $textColor;
+  font-size: 12px;
+}
+
+/* Wrapper for page content to push down footer */
+#wrap {
+  min-height: 90vh;
+}
+#footer {
+  background-color: #f5f5f5;
+  min-height: 10vh;
+  padding: 10px;
+}
+
+a:link, a:visited {
+  outline: 0;
+}
+a:hover, a:active {
+  text-decoration: none;
+}
+a img {
+  border: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+}
+
+hr.section-spacer {
+  width: 25%;
+  border: 0;
+  height: 1px;
+  color: $accentColor1;
+  background-image: -webkit-linear-gradient(left, rgba($accentColor1R,$accentColor1G,$accentColor1B,0), rgba($accentColor1R,$accentColor1G,$accentColor1B,0.75), rgba($accentColor1R,$accentColor1G,$accentColor1B,0));
+  background-image:    -moz-linear-gradient(left, rgba($accentColor1R,$accentColor1G,$accentColor1B,0), rgba($accentColor1R,$accentColor1G,$accentColor1B,0.75), rgba($accentColor1R,$accentColor1G,$accentColor1B,0));
+  background-image:     -ms-linear-gradient(left, rgba($accentColor1R,$accentColor1G,$accentColor1B,0), rgba($accentColor1R,$accentColor1G,$accentColor1B,0.75), rgba($accentColor1R,$accentColor1G,$accentColor1B,0));
+  background-image:      -o-linear-gradient(left, rgba($accentColor1R,$accentColor1G,$accentColor1B,0), rgba($accentColor1R,$accentColor1G,$accentColor1B,0.75), rgba($accentColor1R,$accentColor1G,$accentColor1B,0));
+}
+
+.navbar {
+  width: 100%;
+  box-shadow: 0 1px 1px 0 rgba(0,0,0,0.45);
+}
+
+#welcome {
+  color: $accentColor1;
+}
+
+#content {
+  padding-top: 60px;
+  margin-bottom: 60px;
+}
+
+.shadow-sm {
+  box-shadow: 0 1px 6px rgba(0,0,0,.12),0 1px 6px rgba(0,0,0,.12);
+}
+
+.margin-top-10 {
+  margin-top: 10px;
+}
+
+.margin-5 {
+  margin: 5px;
+}
+
+section {
+  padding: 5% 0;
+}
+
+h2.section-title  {
+  font-size: 2.5em;
+  display: inline-block;
+  margin-bottom: 5px;
+  padding: 0 8px;
+  letter-spacing: 0.1em;
+  line-height: 1em;
+  text-transform: uppercase;
+  color: $headerColor;
+}
+
+.main-background {
+  background-color: $mainBackground;
+}
+
+.alternate-background {
+  background-color: $alternateBackground;
+}
+
+.padding-10 {
+  padding: 10px;
+}
+
+.text-accent {
+  color: $accentColor1;
+}
+
+
+.footer {
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+  background-color: $footerBackground;
+}
+
+.card-large {
+  padding: 10px;
+  margin:20px 0px;
+  background-color: $alternateBackground;
+  opacity: 1;
+  transition: all .5s ease 0s;
+  overflow: hidden;
+}
+
+h4.title {
+  color: #000;
+}
+
+i.loading {
+  font-size: 64px;
+}
+
+div.copy {
+  overflow: hidden;
+  line-height: 1.5;
+  max-height: 200px;
+  text-overflow: ellipsis;
+  content: "";
+  position:relative;
+}
+
+div.copy:before {
+  content:'';
+  width:100%;
+  height:100%;
+  position:absolute;
+  left:0;
+  top:0;
+  background:linear-gradient(transparent 100px, #f5f5f5);
+  cursor: pointer;
+}
+
+div.no-fade:before {
+  content:'';
+  background: none;
+  max-height: none;
+  height: 0px;
+  cursor: auto;
+}
+
+div.fade:before {
+  content:'';
+  width:100%;
+  height:100%;
+  position:absolute;
+  left:0;
+  top:0;
+  background:linear-gradient(transparent 100px, #f5f5f5);
+  cursor: pointer;
+}
+
+h1.blank-state-icon {
+  font-size: 164px;
 }

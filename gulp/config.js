@@ -11,7 +11,9 @@ export default {
     src: 'app/styles/**/*.scss',
     dest: 'build/css',
     prodSourcemap: false,
-    sassIncludePaths: []
+    sassIncludePaths: [
+      'node_modules/bootstrap-sass/assets/stylesheets',
+      'node_modules/angular-material/modules/scss']
   },
 
   scripts: {
@@ -27,7 +29,10 @@ export default {
   },
 
   fonts: {
-    src: ['app/fonts/**/*'],
+    src: [
+      'app/fonts/**/*',
+      'node_modules/bootstrap-sass/assets/fonts/**/*'
+    ],
     dest: 'build/fonts'
   },
 
@@ -47,7 +52,7 @@ export default {
 
   views: {
     index: 'app/index.html',
-    src: 'app/views/**/*.html',
+    src: ['app/views/**/*.html'],
     dest: 'app/js'
   },
 

@@ -1,23 +1,16 @@
 {
-  "name": "angularjs-gulp-browserify-boilerplate",
-  "version": "1.7.0",
-  "author": "Jake Marsh <jakemmarsh@gmail.com>",
-  "description": "Boilerplate using AngularJS, SASS, Gulp, and Browserify while also utilizing best practices.",
+  "name": "eve-opportunity",
+  "version": "0.0.1",
+  "author": "Russell Pollock",
+  "description": "Market analysis tool for Eve Online",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jakemmarsh/angularjs-gulp-browserify-boilerplate.git"
+    "url": ""
   },
   "license": "MIT",
   "keywords": [
-    "express",
-    "gulp",
-    "browserify",
-    "angular",
-    "sass",
-    "karma",
-    "jasmine",
-    "protractor",
-    "boilerplate"
+    "Eve Online",
+    "Market Analysis"
   ],
   "private": false,
   "engines": {
@@ -32,12 +25,20 @@
     "unit": "cross-env NODE_ENV=test ./node_modules/.bin/gulp unit"
   },
   "dependencies": {
-    "cross-env": "^1.0.8"
+    "angular": "^1.5.0",
+    "angular-animate": "^1.5.8",
+    "angular-aria": "^1.5.8",
+    "angular-material": "^1.1.0",
+    "angular-messages": "^1.5.8",
+    "angular-moment": "^1.0.0-beta.6",
+    "angular-ui-router": "^0.2.13",
+    "bootstrap-sass": "^3.3.7",
+    "cross-env": "^1.0.8",
+    "highcharts-ng": "0.0.12",
+    "immutable": "^3.8.1"
   },
   "devDependencies": {
-    "angular": "^1.5.0",
     "angular-mocks": "^1.3.15",
-    "angular-ui-router": "^0.2.13",
     "babel-core": "^6.3.26",
     "babel-eslint": "^5.0.0",
     "babel-preset-es2015": "^6.3.13",
