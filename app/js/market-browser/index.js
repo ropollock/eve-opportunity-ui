@@ -1,4 +1,5 @@
 import angular from 'angular';
+import 'angular-material';
 import 'angular-messages';
 
 const bulk = require('bulk-require');

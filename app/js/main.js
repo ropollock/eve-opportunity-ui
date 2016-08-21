@@ -5,7 +5,6 @@ import constants from './constants';
 import onConfig  from './on_config';
 import onRun     from './on_run';
 import 'angular-ui-router';
-import 'angular-material';
 import './market-browser';
 import './templates';
 
