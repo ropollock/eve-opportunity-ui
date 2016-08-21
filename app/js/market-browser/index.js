@@ -1,9 +1,16 @@
 import angular from 'angular';
 import 'angular-material';
 import 'angular-messages';
+import './../cache';
+import './../crest';
 
 const bulk = require('bulk-require');
-const marketBrowserModule = angular.module('eve.market', ['ngMaterial', 'ngMessages']);
+const marketBrowserModule = angular.module('eve.market', [
+  'ngMaterial',
+  'ngMessages',
+  'eve.cache',
+  'eve.crest'
+]);
 
 const controllers = bulk(__dirname, ['./**/*-controller.js', './**/!(*index|*.spec).js']);
 const services = bulk(__dirname, ['./**/*-service.js', './**/!(*index|*.spec).js']);
