@@ -6,6 +6,8 @@ function cacheService(moment, CACHE_CONSTANTS) {
   service.get = get;
   service.cache = cache;
 
+  return service;
+
   function get(key) {
     var cacheKey = CACHE_CONSTANTS.PREFIX + key;
     var cacheObj = localStorage.getItem(cacheKey);
@@ -48,8 +50,6 @@ function cacheService(moment, CACHE_CONSTANTS) {
   function deleteCache(key) {
     localStorage.removeItem(key);
   }
-
-  return service;
 }
 
 export default {

@@ -3,13 +3,15 @@ import 'angular-material';
 import 'angular-messages';
 import './../cache';
 import './../crest';
+import './../api';
 
 const bulk = require('bulk-require');
 const marketBrowserModule = angular.module('eve.market', [
   'ngMaterial',
   'ngMessages',
   'eve.cache',
-  'eve.crest'
+  'eve.crest',
+  'eve.api'
 ]);
 
 const controllers = bulk(__dirname, ['./**/*-controller.js', './**/!(*index|*.spec).js']);

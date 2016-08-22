@@ -1,7 +1,7 @@
 const AppSettings = {
-  appTitle: 'Eve Opportunity',
-  apiUrl: '/api/v1',
-  crestUrl: ''
+  APP_TITLE: 'Eve Opportunity',
+  API_URL: 'http://localhost:3000/',
+  CREST_API_URL: 'https://crest-tq.eveonline.com'
 };
 
 export default AppSettings;

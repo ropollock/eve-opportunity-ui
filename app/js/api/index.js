@@ -1,7 +1,7 @@
 import angular from 'angular';
 
 const bulk = require('bulk-require');
-const crestModule = angular.module('eve.crest', []);
+const apiModule = angular.module('eve.api', []);
 
 const services = bulk(__dirname, ['./**/*-service.js', './**/!(*index|*.spec).js']);
 
@@ -14,7 +14,7 @@ function declareServices(serviceMap) {
     }
 
     if (item.fn && typeof item.fn === 'function') {
-      crestModule.service(item.name, item.fn);
+      apiModule.service(item.name, item.fn);
     } else {
       declareServices(item);
     }
@@ -23,9 +23,8 @@ function declareServices(serviceMap) {
 
 declareServices(services);
 
-crestModule.constant('CREST_CACHE_KEYS', {
-  REGIONS: {key: 'Regions', duration: 1, durationUnit: 'days'},
-  MARKET_TYPES: {key: 'MarketTypes', duration: 1, durationUnit: 'days'}
+apiModule.constant('API_CACHE_KEYS', {
+  TRADE_HUBS: {key: 'TradeHubs', duration: 1, durationUnit: 'days'}
 });
 
-export default crestModule;
+export default apiModule;

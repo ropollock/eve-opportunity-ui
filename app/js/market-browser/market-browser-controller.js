@@ -1,5 +1,5 @@
 
-function marketBrowserController($log, cacheService, CREST_CACHE_KEYS) {
+function marketBrowserController($log, marketBrowserService, apiService, crestAPIService, $q) {
   'ngInject'
 
   const vm = this;
@@ -9,11 +9,11 @@ function marketBrowserController($log, cacheService, CREST_CACHE_KEYS) {
     marketTypes: [],
     itemSearchText: '',
     selectedItem: null,
-    queryItems: null,
-    regions: [],
-    regionSearchText: '',
-    selectedRegion: null,
-    queryRegions: null,
+    queryItems: queryItems,
+    tradeHubs: [],
+    tradeHubSearchText: '',
+    selectedTradeHub: null,
+    queryTradeHubs: queryTradeHubs,
     analysis: null
   };
 
@@ -32,8 +32,8 @@ function marketBrowserController($log, cacheService, CREST_CACHE_KEYS) {
 
   function activate() {
     $log.info('Activating MarketBrowserController');
-    /*initMarketTypes();
-    initRegions();*/
+    initMarketTypes();
+    initTradeHubs();
   }
 
   function checkMarketBrowserLoaded() {
@@ -41,48 +41,67 @@ function marketBrowserController($log, cacheService, CREST_CACHE_KEYS) {
       $log.info('Market types loaded');
       vm.form.loading = false;
 
-/*      if($scope.form.regions.length > 0) {
-        cacheRegions();
-      }*/
+      if(vm.form.tradeHubs.length > 0) {
+        marketBrowserService.cacheTradeHubs(vm.form.tradeHubs);
+      }
 
 
       if(vm.form.marketTypes.length > 0) {
-        cacheMarketTypes();
+        marketBrowserService.cacheMarketTypes(vm.form.marketTypes);
       }
     }
   }
 
-  function cacheMarketTypes() {
-    cacheService.cache(CREST_CACHE_KEYS.MARKET_TYPES.key, vm.form.marketTypes, CREST_CACHE_KEYS.MARKET_TYPES.duration,
-      CREST_CACHE_KEYS.MARKET_TYPES.durationUnit);
-  }
-
-  /*function initMarketTypes() {
-    var cachedMarketTypes = CacheService.get(CREST_CACHE_KEYS.MARKET_TYPES.key);
-    if(cachedMarketTypes !== null) {
-      $scope.init.initCalls += 1;
-      $scope.form.marketTypes = cachedMarketTypes;
+  function initTradeHubs() {
+    var cachedTradeHubs = marketBrowserService.getCachedTradeHubs();
+    if(cachedTradeHubs !== null) {
+      vm.init.initCalls += 1;
+      vm.form.tradeHubs = cachedTradeHubs;
       checkMarketBrowserLoaded();
     }
     else {
-      CrestAPIService.market.types.getAll(1)
+      apiService.getTradeHubs()
         .success(success)
         .error(error);
     }
 
-    function success(response, status, headers, config) {
-      $scope.init.marketTypePageCount = response.pageCount;
-      $scope.init.initCallCount += $scope.init.marketTypePageCount-1;
-      $scope.init.initCalls += 1;
-      $scope.init.initLoadPercentage = ($scope.init.initCalls / $scope.init.initCallCount) * 100;
+    function success(response) {
+      vm.init.initCalls += 1;
+      vm.form.tradeHubs = vm.form.tradeHubs.concat(response.items);
+
+      checkMarketBrowserLoaded();
+    }
+
+    function error(response) {
+      $log.error('initTradeHubs api error: ' + JSON.stringify(response));
+    }
+  }
+
+  function initMarketTypes() {
+    var cachedMarketTypes = marketBrowserService.getCachedMarketTypes();
+    if(cachedMarketTypes !== null) {
+      vm.init.initCalls += 1;
+      vm.form.marketTypes = cachedMarketTypes;
+      checkMarketBrowserLoaded();
+    }
+    else {
+      crestAPIService.getAllMarketTypes(1)
+        .success(success)
+        .error(error);
+    }
+
+    function success(response) {
+      vm.init.marketTypePageCount = response.pageCount;
+      vm.init.initCallCount += vm.init.marketTypePageCount-1;
+      vm.init.initCalls += 1;
 
       var itemsToAdd = [];
 
-      response.items.forEach(function(item, arr) {
+      response.items.forEach(function(item) {
         itemsToAdd.push(item.type);
       });
 
-      $scope.form.marketTypes = $scope.form.marketTypes.concat(itemsToAdd);
+      vm.form.marketTypes = vm.form.marketTypes.concat(itemsToAdd);
 
       if(response.pageCount > 1) {
         loadAdditionalMarketTypePages();
@@ -92,40 +111,77 @@ function marketBrowserController($log, cacheService, CREST_CACHE_KEYS) {
       }
     }
 
-    function error(response, status, headers, config) {
+    function error(response) {
       $log.error('initMarketTypes CREST error: ' + JSON.stringify(response));
     }
   }
 
   function loadAdditionalMarketTypePages() {
-
-    for(var i = 2; i <= $scope.init.marketTypePageCount; i++) {
-      $scope.init.marketTypePromises.push(CrestAPIService.market.types.getAll(i)
+    for(var i = 2; i <= vm.init.marketTypePageCount; i++) {
+      vm.init.marketTypePromises.push(crestAPIService.getAllMarketTypes(i)
         .success(success)
         .error(error));
     }
 
-    function success(response, status, headers, config) {
-      $scope.init.initCalls += 1;
-      $scope.init.initLoadPercentage = ($scope.init.initCalls / $scope.init.initCallCount) * 100;
-
+    function success(response) {
+      vm.init.initCalls += 1;
       var itemsToAdd = [];
 
-      response.items.forEach(function(item, arr) {
+      response.items.forEach(function(item) {
         itemsToAdd.push(item.type);
       });
 
-      $scope.form.marketTypes = $scope.form.marketTypes.concat(itemsToAdd);
+      vm.form.marketTypes = vm.form.marketTypes.concat(itemsToAdd);
     }
 
-    function error(response, status, headers, config) {
+    function error(response) {
       $log.error('CREST error: ' + JSON.stringify(response));
     }
 
-    $q.all($scope.init.marketTypePromises).then(function() {
+    $q.all(vm.init.marketTypePromises).then(function() {
       checkMarketBrowserLoaded();
     });
-  }*/
+  }
+
+  function queryItems(query) {
+    var results =  query ? vm.form.marketTypes.filter( marketTypeFilter(query) ) : vm.form.marketTypes;
+
+    // Sort results by string length
+    results.sort(function(a, b){
+      return a.name.length - b.name.length;
+    });
+
+    return results;
+
+    // Filter results by query string
+    function marketTypeFilter(query) {
+      var lowercaseQuery = angular.lowercase(query);
+
+      return function filterFn(item) {
+        return (angular.lowercase(item.name).indexOf(lowercaseQuery) === 0);
+      };
+    }
+  }
+
+  function queryTradeHubs(query) {
+    var results =  query ? vm.form.tradeHubs.filter( tradeHubFilter(query) ) : vm.form.tradeHubs;
+
+    // Sort results by string length
+    results.sort(function(a, b){
+      return a.name.length - b.name.length;
+    });
+
+    return results;
+
+    // Filter results by query string
+    function tradeHubFilter(query) {
+      var lowercaseQuery = angular.lowercase(query);
+
+      return function filterFn(item) {
+        return (angular.lowercase(item.name).indexOf(lowercaseQuery) === 0);
+      };
+    }
+  }
 }
 
 export default {
