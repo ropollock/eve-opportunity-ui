@@ -1,4 +1,5 @@
 import angular from 'angular';
+let lodash = require('lodash');
 
 // angular modules
 import constants from './constants';
@@ -19,6 +20,7 @@ const requires = [
 window.app = angular.module('app', requires);
 
 angular.module('app').constant('AppSettings', constants);
+angular.module('app').constant('_', lodash);
 angular.module('app').config(onConfig);
 angular.module('app').run(onRun);
 

@@ -9,11 +9,11 @@ function marketBrowserController($log, marketBrowserService, apiService, crestAP
     marketTypes: [],
     itemSearchText: '',
     selectedItem: null,
-    queryItems: queryItems,
+    queryItems: query => {return marketBrowserService.queryItems(query, vm.form.marketTypes) },
     tradeHubs: [],
     tradeHubSearchText: '',
     selectedTradeHub: null,
-    queryTradeHubs: queryTradeHubs,
+    queryTradeHubs: query => {return marketBrowserService.queryTradeHubs(query, vm.form.tradeHubs)},
     analysis: null
   };
 
@@ -44,7 +44,6 @@ function marketBrowserController($log, marketBrowserService, apiService, crestAP
       if(vm.form.tradeHubs.length > 0) {
         marketBrowserService.cacheTradeHubs(vm.form.tradeHubs);
       }
-
 
       if(vm.form.marketTypes.length > 0) {
         marketBrowserService.cacheMarketTypes(vm.form.marketTypes);
@@ -141,46 +140,6 @@ function marketBrowserController($log, marketBrowserService, apiService, crestAP
     $q.all(vm.init.marketTypePromises).then(function() {
       checkMarketBrowserLoaded();
     });
-  }
-
-  function queryItems(query) {
-    var results =  query ? vm.form.marketTypes.filter( marketTypeFilter(query) ) : vm.form.marketTypes;
-
-    // Sort results by string length
-    results.sort(function(a, b){
-      return a.name.length - b.name.length;
-    });
-
-    return results;
-
-    // Filter results by query string
-    function marketTypeFilter(query) {
-      var lowercaseQuery = angular.lowercase(query);
-
-      return function filterFn(item) {
-        return (angular.lowercase(item.name).indexOf(lowercaseQuery) === 0);
-      };
-    }
-  }
-
-  function queryTradeHubs(query) {
-    var results =  query ? vm.form.tradeHubs.filter( tradeHubFilter(query) ) : vm.form.tradeHubs;
-
-    // Sort results by string length
-    results.sort(function(a, b){
-      return a.name.length - b.name.length;
-    });
-
-    return results;
-
-    // Filter results by query string
-    function tradeHubFilter(query) {
-      var lowercaseQuery = angular.lowercase(query);
-
-      return function filterFn(item) {
-        return (angular.lowercase(item.name).indexOf(lowercaseQuery) === 0);
-      };
-    }
   }
 }
 

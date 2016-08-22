@@ -1,6 +1,6 @@
 {
   "name": "eve-opportunity",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Russell Pollock",
   "description": "Market analysis tool for Eve Online",
   "repository": {
@@ -36,6 +36,7 @@
     "cross-env": "^1.0.8",
     "highcharts-ng": "0.0.12",
     "immutable": "^3.8.1",
+    "lodash": "^4.15.0",
     "moment": "^2.14.1"
   },
   "devDependencies": {
