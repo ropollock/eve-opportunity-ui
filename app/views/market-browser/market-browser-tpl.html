@@ -7,7 +7,8 @@
     <form ng-submit="form.analysis()" name="searchForm">
     <div class="row">
         <div class="col-md-6">
-            <md-autocomplete spellcheck="false" md-selected-item-change="marketBrowserCtrl.form.analysis()" flex=""
+            <md-autocomplete ng-disabled="marketBrowserCtrl.form.loading" spellcheck="false"
+                             md-selected-item-change="marketBrowserCtrl.form.analysis()" flex=""
                              required="true" md-select-on-match="true" md-autoselect="true"
                              md-no-cache="marketBrowserCtrl.form.autocompleteNoCache" md-input-name="tradeHubAutoComplete"
                              md-input-minlength="3" md-selected-item="marketBrowserCtrl.form.selectedTradeHub"
@@ -25,7 +26,8 @@
             </md-autocomplete>
         </div>
         <div class="col-md-6">
-            <md-autocomplete spellcheck="false" md-selected-item-change="marketBrowserCtrl.form.analysis()" flex=""
+            <md-autocomplete ng-disabled="marketBrowserCtrl.form.loading" spellcheck="false"
+                             md-selected-item-change="marketBrowserCtrl.form.analysis()" flex=""
                              required="true" md-select-on-match="true" md-autoselect="true"
                              md-no-cache="marketBrowserCtrl.form.autocompleteNoCache" md-input-name="itemAutoComplete"
                              md-input-minlength="3" md-selected-item="marketBrowserCtrl.form.selectedItem"

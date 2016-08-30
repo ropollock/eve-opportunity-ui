@@ -9,12 +9,12 @@ function marketBrowserController($log, marketBrowserService, apiService, crestAP
     marketTypes: [],
     itemSearchText: '',
     selectedItem: null,
-    queryItems: query => {return marketBrowserService.queryItems(query, vm.form.marketTypes) },
+    queryItems: query => {return marketBrowserService.queryItems(query, vm.form.marketTypes)},
     tradeHubs: [],
     tradeHubSearchText: '',
     selectedTradeHub: null,
     queryTradeHubs: query => {return marketBrowserService.queryTradeHubs(query, vm.form.tradeHubs)},
-    analysis: null
+    analysis: analysis
   };
 
   vm.analysis = {
@@ -52,7 +52,7 @@ function marketBrowserController($log, marketBrowserService, apiService, crestAP
   }
 
   function initTradeHubs() {
-    var cachedTradeHubs = marketBrowserService.getCachedTradeHubs();
+    let cachedTradeHubs = marketBrowserService.getCachedTradeHubs();
     if(cachedTradeHubs !== null) {
       vm.init.initCalls += 1;
       vm.form.tradeHubs = cachedTradeHubs;
@@ -77,7 +77,7 @@ function marketBrowserController($log, marketBrowserService, apiService, crestAP
   }
 
   function initMarketTypes() {
-    var cachedMarketTypes = marketBrowserService.getCachedMarketTypes();
+    let cachedMarketTypes = marketBrowserService.getCachedMarketTypes();
     if(cachedMarketTypes !== null) {
       vm.init.initCalls += 1;
       vm.form.marketTypes = cachedMarketTypes;
@@ -94,7 +94,7 @@ function marketBrowserController($log, marketBrowserService, apiService, crestAP
       vm.init.initCallCount += vm.init.marketTypePageCount-1;
       vm.init.initCalls += 1;
 
-      var itemsToAdd = [];
+      let itemsToAdd = [];
 
       response.items.forEach(function(item) {
         itemsToAdd.push(item.type);
@@ -124,7 +124,7 @@ function marketBrowserController($log, marketBrowserService, apiService, crestAP
 
     function success(response) {
       vm.init.initCalls += 1;
-      var itemsToAdd = [];
+      let itemsToAdd = [];
 
       response.items.forEach(function(item) {
         itemsToAdd.push(item.type);
@@ -137,9 +137,35 @@ function marketBrowserController($log, marketBrowserService, apiService, crestAP
       $log.error('CREST error: ' + JSON.stringify(response));
     }
 
+    // Await outstanding market type queries
     $q.all(vm.init.marketTypePromises).then(function() {
       checkMarketBrowserLoaded();
     });
+  }
+
+  function isQueryReady(form) {
+    let {selectedItem, selectedTradeHub} = form;
+    return (selectedItem && selectedTradeHub);
+  }
+
+  function analysis() {
+    if(!isQueryReady(vm.form)) {
+      return;
+    }
+
+    let {selectedItem, selectedTradeHub} = vm.form;
+    vm.form.loading = true;
+
+    apiService.getOHLC(selectedItem.id, selectedTradeHub.name)
+      .success((response) => {
+        $log.info(response);
+      })
+      .error((error) => {
+        $log.error('Unable to query OHLC for : ' + selectedItem.id + ' : ' + selectedTradeHub.name + ' ' + JSON.stringify(error));
+      })
+      .finally(() => {
+        vm.form.loading = false;
+      });
   }
 }
 

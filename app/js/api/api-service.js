@@ -3,6 +3,7 @@ function apiService($http, AppSettings) {
   'ngInject'
 
   const TRADE_HUBS_ENDPOINT = '/tradehubs';
+  const OHLC_ENDPOINT = '/ohlc';
   const METHODS = {
     GET:    'GET',
     POST:   'POST',
@@ -13,14 +14,29 @@ function apiService($http, AppSettings) {
   const service = {};
 
   service.getTradeHubs = getTradeHubs;
+  service.getOHLC = getOHLC;
 
   return service;
 
   function getTradeHubs() {
-    var httpCfg = {};
+    let httpCfg = {};
 
     httpCfg.endpoint = TRADE_HUBS_ENDPOINT;
     httpCfg.method = METHODS.GET;
+
+    return request.call(httpCfg);
+  }
+
+  function getOHLC(itemId, tradeHubName, buy = false) {
+    let httpCfg = {};
+
+    httpCfg.endpoint = OHLC_ENDPOINT;
+    httpCfg.method = METHODS.POST;
+    httpCfg.data = {
+      itemId: itemId,
+      tradeHubName: tradeHubName,
+      buy: buy
+    };
 
     return request.call(httpCfg);
   }
