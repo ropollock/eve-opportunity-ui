@@ -4,6 +4,7 @@ import 'angular-messages';
 import './../cache';
 import './../crest';
 import './../api';
+import 'highcharts-ng';
 
 const bulk = require('bulk-require');
 const marketBrowserModule = angular.module('eve.market', [
@@ -11,7 +12,8 @@ const marketBrowserModule = angular.module('eve.market', [
   'ngMessages',
   'eve.cache',
   'eve.crest',
-  'eve.api'
+  'eve.api',
+  'highcharts-ng'
 ]);
 
 const controllers = bulk(__dirname, ['./**/*-controller.js', './**/!(*index|*.spec).js']);

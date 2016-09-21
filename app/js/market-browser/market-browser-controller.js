@@ -1,8 +1,13 @@
 
-function marketBrowserController($log, marketBrowserService, apiService, crestAPIService, $q) {
+function marketBrowserController($scope, $log, marketBrowserService, apiService, crestAPIService, $q, marketChartsService) {
   'ngInject'
 
   const vm = this;
+  const EVENT_QUERY_ANALYSIS = 'eventQueryAnalysis';
+  const EVENT_ANALYSIS_COMPLETE = 'eventAnalysisComplete';
+  const EVENT_ANALYSIS_SUCCESSFUL = 'eventAnalysisSuccessful';
+  const EVENT_ANALYSIS_FAILED = 'eventAnalysisFailed';
+  const EVENT_INVALID_QUERY = 'eventInvalidQuery';
 
   vm.form = {
     loading: true,
@@ -18,7 +23,11 @@ function marketBrowserController($log, marketBrowserService, apiService, crestAP
   };
 
   vm.analysis = {
-    loading: false
+    show: false
+  };
+
+  vm.ohlc = {
+    config: marketChartsService.createDefaultOHLCConfig()
   };
 
   vm.init = {
@@ -32,8 +41,50 @@ function marketBrowserController($log, marketBrowserService, apiService, crestAP
 
   function activate() {
     $log.info('Activating MarketBrowserController');
+    initEvents();
     initMarketTypes();
     initTradeHubs();
+  }
+
+  function initEvents() {
+    onQueryAnalysis();
+    onAnalysisComplete();
+    onAnalysisSuccessful();
+    onAnalysisFailed();
+    onInvalidQuery();
+  }
+
+  function onQueryAnalysis() {
+    $scope.$on(EVENT_QUERY_ANALYSIS, () => {
+      vm.form.loading = true;
+      vm.analysis.show = false;
+    });
+  }
+
+  function onAnalysisComplete() {
+    $scope.$on(EVENT_ANALYSIS_COMPLETE, () => {
+      vm.form.loading = false;
+    });
+  }
+
+  function onAnalysisSuccessful() {
+    $scope.$on(EVENT_ANALYSIS_SUCCESSFUL, () => {
+      vm.analysis.show = true;
+    });
+  }
+
+  function onAnalysisFailed() {
+    $scope.$on(EVENT_ANALYSIS_FAILED, (err) => {
+      $log.error(err);
+      // @TODO show error state
+      $log.error('Unable to query OHLC for : ' + error.item + ' : ' + error.tradeHub + ' ' + JSON.stringify(error.error));
+    })
+  }
+
+  function onInvalidQuery() {
+    $scope.$on(EVENT_INVALID_QUERY, () => {
+      vm.analysis.show = false;
+    });
   }
 
   function checkMarketBrowserLoaded() {
@@ -150,21 +201,57 @@ function marketBrowserController($log, marketBrowserService, apiService, crestAP
 
   function analysis() {
     if(!isQueryReady(vm.form)) {
+      $scope.$broadcast(EVENT_INVALID_QUERY);
       return;
     }
 
+    $scope.$broadcast(EVENT_QUERY_ANALYSIS);
     let {selectedItem, selectedTradeHub} = vm.form;
-    vm.form.loading = true;
 
+    // Request an OHLC resource for the selected item and trade hub
     apiService.getOHLC(selectedItem.id, selectedTradeHub.name)
       .success((response) => {
-        $log.info(response);
+        $log.debug(response);
+        if(response.days) {
+          // Use the OHLC resource data to create a highstock candlestick chart
+          vm.ohlc.config.series = [];
+          vm.ohlc.config.series.push({
+            type: 'candlestick',
+            data: response.days.map((day) => {
+              return marketChartsService.createOHLCInterval({
+                open: day.open,
+                close: day.close,
+                high: day.max,
+                low: day.min,
+                time: day.time * 1000
+              })
+            }),
+            dataGrouping: {
+              units: [
+                ['day', 1]
+              ]
+            }
+          });
+
+          vm.ohlc.config.series.push({
+            data: response.days.map((day) => {
+              return [day.time * 1000, day.avg];
+            })
+          });
+
+          //$log.debug(vm.ohlc.config.series);
+          $scope.$broadcast(EVENT_ANALYSIS_SUCCESSFUL);
+        }
+        else {
+          // @TODO log error
+          throw new Error('Unable to build ohlc chart from ohlc response. Response:' + response);
+        }
       })
       .error((error) => {
-        $log.error('Unable to query OHLC for : ' + selectedItem.id + ' : ' + selectedTradeHub.name + ' ' + JSON.stringify(error));
+        $scope.$broadcast(EVENT_ANALYSIS_FAILED, {error: error, item: selectedItem.id, tradeHub: selectedItem.id});
       })
       .finally(() => {
-        vm.form.loading = false;
+        $scope.$broadcast(EVENT_ANALYSIS_COMPLETE);
       });
   }
 }

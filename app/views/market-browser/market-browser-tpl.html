@@ -47,6 +47,10 @@
     </form>
     <div class="row" data-ng-if="marketBrowserCtrl.form.loading" ng-include="'loading-tpl.html'"></div>
 
+  <div class="row" data-ng-if="!marketBrowserCtrl.form.loading && marketBrowserCtrl.analysis.show">
+    <div class="col-md-12"><highchart id="chart1" config="marketBrowserCtrl.ohlc.config"></highchart></div>
+  </div>
+
     <!--<div class="row shadow-sm" data-ng-if="!form.loading && analysis.priceHistory.data">
         <div class="col-md-12">
             <div price-history history="analysis.priceHistory.charts">
