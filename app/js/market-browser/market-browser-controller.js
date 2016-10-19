@@ -41,7 +41,6 @@ function marketBrowserController($scope, $log, $timeout, marketBrowserService, a
 
   function activate() {
     $log.info('Activating MarketBrowserController');
-
     initEvents();
     initMarketTypes();
     initTradeHubs();
@@ -220,6 +219,11 @@ function marketBrowserController($scope, $log, $timeout, marketBrowserService, a
             vm.ohlc.config.series = [];
             vm.ohlc.config.series.push({
               type: 'candlestick',
+              name: "OHLC",
+              tooltip: {
+                valueDecimals: 1,
+                valueSuffix: ' ISK',
+              },
               data: response.days.map((day) => {
                 return marketChartsService.createOHLCInterval({
                   open: day.open,
@@ -236,16 +240,13 @@ function marketBrowserController($scope, $log, $timeout, marketBrowserService, a
               }
             });
 
-            /*vm.ohlc.config.series.push({
-             data: response.days.map((day) => {
-             return [day.time * 1000, day.avg];
-             })
-             });*/
-
             vm.ohlc.config.series.push({
               type: 'column',
-              name: 'Volume',
+              name: 'Average Volume',
               yAxis: 1,
+              tooltip: {
+                valueDecimals: 1
+              },
               dataGrouping: {
                 units: [
                   ['day', 1]

@@ -34,7 +34,7 @@ function marketChartsService($timeout) {
             x: -3
           },
           title: {
-            text: 'OHLC'
+            text: 'ISK'
           },
           height: '60%',
           lineWidth: 2
