@@ -1,5 +1,5 @@
 
-function marketChartsService() {
+function marketChartsService($timeout) {
   'ngInject';
 
   const service = {};
@@ -15,20 +15,55 @@ function marketChartsService() {
       title: {
         text: 'OHLC'
       },
-      useHighStocks: true
+      options : {
+        chart: {
+          zoomType: 'x'
+        },
+        rangeSelector: {
+          enabled: true
+        },
+        navigator: {
+          enabled: true
+        },
+        scrollbar: {
+          enabled: false
+        },
+        yAxis: [{
+          labels: {
+            align: 'right',
+            x: -3
+          },
+          title: {
+            text: 'OHLC'
+          },
+          height: '60%',
+          lineWidth: 2
+        }, {
+          labels: {
+            align: 'right',
+            x: -3
+          },
+          title: {
+            text: 'Volume'
+          },
+          top: '65%',
+          height: '35%',
+          offset: 0,
+          lineWidth: 2
+        }]
+      },
+      useHighStocks: true,
+      func: function(chart) {
+        $timeout(function() {
+          chart.reflow();
+        }, 0);
+      }
     }
   }
 
   function createOHLCInterval(interval) {
     let {time, high, low, open, close} = interval;
-
-    return {
-      x: time,
-      open: open,
-      high: high,
-      low: low,
-      close: close
-    };
+    return [time, open, high, low, close];
   }
 }
 
