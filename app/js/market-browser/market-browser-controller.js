@@ -211,60 +211,57 @@ function marketBrowserController($scope, $log, $timeout, marketBrowserService, a
     // Request an OHLC resource for the selected item and trade hub
     apiService.getOHLC(selectedItem.id, selectedTradeHub.name)
       .success((response) => {
-
-        $scope.$evalAsync(() => {
-          $log.debug(response);
-          if(response.days) {
-            // Use the OHLC resource data to create a highstock candlestick chart
-            vm.ohlc.config.series = [];
-            vm.ohlc.config.series.push({
-              type: 'candlestick',
-              name: "OHLC",
-              tooltip: {
-                valueDecimals: 1,
-                valueSuffix: ' ISK',
-              },
-              data: response.days.map((day) => {
-                return marketChartsService.createOHLCInterval({
-                  open: day.open,
-                  close: day.close,
-                  high: day.max,
-                  low: day.min,
-                  time: day.time * 1000
-                })
-              }),
-              dataGrouping: {
-                units: [
-                  ['day', 1]
-                ]
-              }
-            });
-
-            vm.ohlc.config.series.push({
-              type: 'column',
-              name: 'Average Volume',
-              yAxis: 1,
-              tooltip: {
-                valueDecimals: 1
-              },
-              dataGrouping: {
-                units: [
-                  ['day', 1]
-                ]
-              },
-              data: response.days.map((day) => {
-                return [day.time * 1000, day.avgVolume];
+        $log.debug(response);
+        if(response.days) {
+          // Use the OHLC resource data to create a highstock candlestick chart
+          vm.ohlc.config.series = [];
+          vm.ohlc.config.series.push({
+            type: 'candlestick',
+            name: 'OHLC',
+            tooltip: {
+              valueDecimals: 1,
+              valueSuffix: ' ISK',
+            },
+            data: response.days.map((day) => {
+              return marketChartsService.createOHLCInterval({
+                open: day.open,
+                close: day.close,
+                high: day.max,
+                low: day.min,
+                time: day.time * 1000
               })
-            });
+            }),
+            dataGrouping: {
+              units: [
+                ['day', 1]
+              ]
+            }
+          });
 
-            $log.debug(vm.ohlc.config);
-            $scope.$broadcast(EVENT_ANALYSIS_SUCCESSFUL);
-          }
-          else {
-            // @TODO log error
-            throw new Error('Unable to build ohlc chart from ohlc response. Response:' + response);
-          }
-        });
+          vm.ohlc.config.series.push({
+            type: 'column',
+            name: 'Average Volume',
+            yAxis: 1,
+            tooltip: {
+              valueDecimals: 1
+            },
+            dataGrouping: {
+              units: [
+                ['day', 1]
+              ]
+            },
+            data: response.days.map((day) => {
+              return [day.time * 1000, day.avgVolume];
+            })
+          });
+
+          $log.debug(vm.ohlc.config);
+          $scope.$broadcast(EVENT_ANALYSIS_SUCCESSFUL);
+        }
+        else {
+          // @TODO log error
+          throw new Error('Unable to build ohlc chart from ohlc response. Response:' + response);
+        }
       })
       .error((error) => {
         $scope.$broadcast(EVENT_ANALYSIS_FAILED, {error: error, item: selectedItem.id, tradeHub: selectedItem.id});

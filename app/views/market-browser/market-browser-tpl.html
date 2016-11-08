@@ -1,9 +1,4 @@
 <div class="container">
-    <!--<div class="row">
-        <div class="col-md-12">
-            <h4><i class="fa fa-search"></i> Market</h4>
-        </div>
-    </div>-->
     <form ng-submit="form.analysis()" name="searchForm">
     <div class="row">
         <div class="col-md-6">
@@ -45,10 +40,11 @@
         </div>
     </div>
     </form>
+
     <div class="row" data-ng-if="marketBrowserCtrl.form.loading" ng-include="'loading-tpl.html'"></div>
 
   <div class="row" data-ng-if="!marketBrowserCtrl.form.loading && marketBrowserCtrl.analysis.show">
-    <div class="col-md-12"><highchart id="chart1" config="marketBrowserCtrl.ohlc.config"></highchart></div>
+    <div class="col-md-12"><div class="shadow-sm"><highchart id="chart1" config="marketBrowserCtrl.ohlc.config"></highchart></div></div>
   </div>
 
     <!--<div class="row shadow-sm" data-ng-if="!form.loading && analysis.priceHistory.data">
