@@ -9,8 +9,8 @@ function cacheService(moment, CACHE_CONSTANTS) {
   return service;
 
   function get(key) {
-    var cacheKey = CACHE_CONSTANTS.PREFIX + key;
-    var cacheObj = localStorage.getItem(cacheKey);
+    const cacheKey = CACHE_CONSTANTS.PREFIX + key;
+    let cacheObj = localStorage.getItem(cacheKey);
 
     if(cacheObj) {
       cacheObj = JSON.parse(cacheObj);
@@ -28,7 +28,7 @@ function cacheService(moment, CACHE_CONSTANTS) {
   }
 
   function cache(key, data, duration, durationUnit) {
-    var obj = {
+    let obj = {
       data: data
     };
 
@@ -38,12 +38,11 @@ function cacheService(moment, CACHE_CONSTANTS) {
 
   function checkExpired(cacheObj) {
     if(cacheObj[CACHE_CONSTANTS.PREFIX + CACHE_CONSTANTS.EXPIRES_VARIABLE]) {
-      var expires = cacheObj[CACHE_CONSTANTS.PREFIX + CACHE_CONSTANTS.EXPIRES_VARIABLE];
-
+      const expires = cacheObj[CACHE_CONSTANTS.PREFIX + CACHE_CONSTANTS.EXPIRES_VARIABLE];
       return expires <= moment().unix();
     }
     else {
-      throw new Error('No expires property found in cache object');
+      throw new Error('No "expires" property found in cache object');
     }
   }
 

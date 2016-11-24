@@ -1,4 +1,3 @@
-
 function marketChartsService($timeout) {
   'ngInject';
 
@@ -59,6 +58,10 @@ function marketChartsService($timeout) {
         }, 0);
       }
     }
+  }
+
+  function createOHLCSeries() {
+    // @TODO generate series object here
   }
 
   function createOHLCInterval(interval) {

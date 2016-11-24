@@ -1,4 +1,3 @@
-
 function apiService($http, AppSettings) {
   'ngInject'
 
@@ -19,30 +18,26 @@ function apiService($http, AppSettings) {
   return service;
 
   function getTradeHubs() {
-    let httpCfg = {};
-
-    httpCfg.endpoint = TRADE_HUBS_ENDPOINT;
-    httpCfg.method = METHODS.GET;
-
-    return request.call(httpCfg);
+    return request.call({
+      endpoint: TRADE_HUBS_ENDPOINT,
+      method: METHODS.GET
+    });
   }
 
   function getOHLC(itemId, tradeHubName, buy = false) {
-    let httpCfg = {};
-
-    httpCfg.endpoint = OHLC_ENDPOINT;
-    httpCfg.method = METHODS.POST;
-    httpCfg.data = {
-      itemId: itemId,
-      tradeHubName: tradeHubName,
-      buy: buy
-    };
-
-    return request.call(httpCfg);
+    return request.call({
+      endpoint: OHLC_ENDPOINT,
+      method: METHODS.POST,
+      data: {
+        itemId: itemId,
+        tradeHubName: tradeHubName,
+        buy: buy
+      }
+    });
   }
 
   function request() {
-    var httpRequest = {};
+    let httpRequest = {};
 
     if(!this.method) {
       throw new Error('No method provided for API request : CRESTAPIService');

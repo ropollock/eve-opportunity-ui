@@ -1,4 +1,3 @@
-
 function marketBrowserController($scope, $log, $timeout, marketBrowserService, apiService, crestAPIService, $q, marketChartsService) {
   'ngInject'
 
@@ -40,7 +39,7 @@ function marketBrowserController($scope, $log, $timeout, marketBrowserService, a
   activate();
 
   function activate() {
-    $log.info('Activating MarketBrowserController');
+    $log.info('Activating MarketBrowserController.');
     initEvents();
     initMarketTypes();
     initTradeHubs();
@@ -89,7 +88,7 @@ function marketBrowserController($scope, $log, $timeout, marketBrowserService, a
 
   function checkMarketBrowserLoaded() {
     if(vm.init.initCalls >= vm.init.initCallCount) {
-      $log.info('Market types loaded');
+      $log.info('Market types have been loaded.');
       vm.form.loading = false;
 
       if(vm.form.tradeHubs.length > 0) {
@@ -111,19 +110,14 @@ function marketBrowserController($scope, $log, $timeout, marketBrowserService, a
     }
     else {
       apiService.getTradeHubs()
-        .success(success)
-        .error(error);
-    }
-
-    function success(response) {
-      vm.init.initCalls += 1;
-      vm.form.tradeHubs = vm.form.tradeHubs.concat(response.items);
-
-      checkMarketBrowserLoaded();
-    }
-
-    function error(response) {
-      $log.error('initTradeHubs api error: ' + JSON.stringify(response));
+        .success((response) => {
+          vm.init.initCalls += 1;
+          vm.form.tradeHubs = vm.form.tradeHubs.concat(response.items);
+          checkMarketBrowserLoaded();
+        })
+        .error((response) => {
+          $log.error('initTradeHubs api error: ' + JSON.stringify(response));
+        });
     }
   }
 
@@ -167,7 +161,7 @@ function marketBrowserController($scope, $log, $timeout, marketBrowserService, a
   }
 
   function loadAdditionalMarketTypePages() {
-    for(var i = 2; i <= vm.init.marketTypePageCount; i++) {
+    for(let i = 2; i <= vm.init.marketTypePageCount; i++) {
       vm.init.marketTypePromises.push(crestAPIService.getAllMarketTypes(i)
         .success(success)
         .error(error));
@@ -213,8 +207,9 @@ function marketBrowserController($scope, $log, $timeout, marketBrowserService, a
       .success((response) => {
         $log.debug(response);
         if(response.days) {
-          // Use the OHLC resource data to create a highstock candlestick chart
+          // Reset series
           vm.ohlc.config.series = [];
+          // Use the OHLC resource data to create a highstock candlestick chart
           vm.ohlc.config.series.push({
             type: 'candlestick',
             name: 'OHLC',
@@ -228,7 +223,7 @@ function marketBrowserController($scope, $log, $timeout, marketBrowserService, a
                 close: day.close,
                 high: day.max,
                 low: day.min,
-                time: day.time * 1000
+                time: day.time
               })
             }),
             dataGrouping: {
@@ -238,6 +233,7 @@ function marketBrowserController($scope, $log, $timeout, marketBrowserService, a
             }
           });
 
+          // Add average volume chart
           vm.ohlc.config.series.push({
             type: 'column',
             name: 'Average Volume',
@@ -251,16 +247,15 @@ function marketBrowserController($scope, $log, $timeout, marketBrowserService, a
               ]
             },
             data: response.days.map((day) => {
-              return [day.time * 1000, day.avgVolume];
+              return [day.time, day.avgVolume];
             })
           });
 
-          $log.debug(vm.ohlc.config);
           $scope.$broadcast(EVENT_ANALYSIS_SUCCESSFUL);
         }
         else {
           // @TODO log error
-          throw new Error('Unable to build ohlc chart from ohlc response. Response:' + response);
+          throw new Error('Unable to build OHLC chart from OHLC response. Response:' + response);
         }
       })
       .error((error) => {

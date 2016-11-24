@@ -31,7 +31,7 @@ function marketBrowserService(cacheService, CREST_CACHE_KEYS, API_CACHE_KEYS) {
   }
 
   function queryItems(query, items) {
-    var results =  query ? items.filter( marketTypeFilter(query) ) : items;
+    let results =  query ? items.filter( marketTypeFilter(query) ) : items;
 
     // Sort results by string length
     results.sort(function(a, b){
@@ -42,7 +42,7 @@ function marketBrowserService(cacheService, CREST_CACHE_KEYS, API_CACHE_KEYS) {
 
     // Filter results by query string
     function marketTypeFilter(query) {
-      var lowercaseQuery = angular.lowercase(query);
+      let lowercaseQuery = angular.lowercase(query);
 
       return function filterFn(item) {
         return (angular.lowercase(item.name).indexOf(lowercaseQuery) === 0);
@@ -51,7 +51,7 @@ function marketBrowserService(cacheService, CREST_CACHE_KEYS, API_CACHE_KEYS) {
   }
 
   function queryTradeHubs(query, tradeHubs) {
-    var results =  query ? tradeHubs.filter( tradeHubFilter(query) ) : tradeHubs;
+    let results =  query ? tradeHubs.filter( tradeHubFilter(query) ) : tradeHubs;
 
     // Sort results by string length
     results.sort(function(a, b){
@@ -62,7 +62,7 @@ function marketBrowserService(cacheService, CREST_CACHE_KEYS, API_CACHE_KEYS) {
 
     // Filter results by query string
     function tradeHubFilter(query) {
-      var lowercaseQuery = angular.lowercase(query);
+      let lowercaseQuery = angular.lowercase(query);
 
       return function filterFn(item) {
         return (angular.lowercase(item.name).indexOf(lowercaseQuery) === 0);

@@ -1,4 +1,3 @@
-
 function crestAPIService($http, AppSettings) {
   'ngInject'
 
@@ -17,7 +16,7 @@ function crestAPIService($http, AppSettings) {
   return service;
 
   function getAllMarketTypes(page) {
-    var httpCfg = {};
+    let httpCfg = {};
 
     httpCfg.endpoint = MARKET_TYPES_ENDPOINT;
     httpCfg.method = METHODS.GET;
@@ -30,7 +29,7 @@ function crestAPIService($http, AppSettings) {
   }
 
   function request() {
-    var httpRequest = {};
+    let httpRequest = {};
 
     if(!this.method) {
       throw new Error('No method provided for API request : CRESTAPIService');
