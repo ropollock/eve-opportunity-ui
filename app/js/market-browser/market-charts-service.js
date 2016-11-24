@@ -5,6 +5,8 @@ function marketChartsService($timeout) {
 
   service.createDefaultOHLCConfig = createDefaultOHLCConfig;
   service.createOHLCInterval = createOHLCInterval;
+  service.createOHLCSeries = createOHLCSeries;
+  service.createOHLCVolumeSeries = createOHLCVolumeSeries;
 
   return service;
 
@@ -60,13 +62,51 @@ function marketChartsService($timeout) {
     }
   }
 
-  function createOHLCSeries() {
-    // @TODO generate series object here
+  function createOHLCSeries(days) {
+    return {
+      type: 'candlestick',
+      name: 'OHLC',
+      tooltip: {
+        valueDecimals: 1,
+        valueSuffix: ' ISK',
+      },
+      data: days.map((day) => {
+        return createOHLCInterval({
+          open: day.open,
+          close: day.close,
+          high: day.max,
+          low: day.min,
+          time: day.time
+        })
+      }),
+      dataGrouping: {
+        units: [['day', 1]]
+      }
+    }
   }
 
   function createOHLCInterval(interval) {
     let {time, high, low, open, close} = interval;
     return [time, open, high, low, close];
+  }
+
+  function createOHLCVolumeSeries(days) {
+    return {
+      type: 'column',
+      name: 'Average Volume',
+      yAxis: 1,
+      tooltip: {
+        valueDecimals: 1
+      },
+      dataGrouping: {
+        units: [
+          ['day', 1]
+        ]
+      },
+      data: days.map((day) => {
+        return [day.time, day.avgVolume];
+      })
+    };
   }
 }
 
