@@ -29,6 +29,10 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
     config: marketChartsService.createDefaultOHLCConfig()
   };
 
+  vm.priceHistory = {
+    config: marketChartsService.createDefaultPriceHistoryConfig()
+  };
+
   vm.init = {
     marketTypePageCount: 1,
     initCalls: 0,
@@ -130,56 +134,48 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
     }
     else {
       crestAPIService.getAllMarketTypes(1)
-        .success(success)
-        .error(error);
-    }
+        .success((response) => {
+          vm.init.marketTypePageCount = response.pageCount;
+          vm.init.initCallCount += vm.init.marketTypePageCount-1;
+          vm.init.initCalls += 1;
 
-    function success(response) {
-      vm.init.marketTypePageCount = response.pageCount;
-      vm.init.initCallCount += vm.init.marketTypePageCount-1;
-      vm.init.initCalls += 1;
+          let itemsToAdd = [];
 
-      let itemsToAdd = [];
+          response.items.forEach(function(item) {
+            itemsToAdd.push(item.type);
+          });
 
-      response.items.forEach(function(item) {
-        itemsToAdd.push(item.type);
-      });
+          vm.form.marketTypes = vm.form.marketTypes.concat(itemsToAdd);
 
-      vm.form.marketTypes = vm.form.marketTypes.concat(itemsToAdd);
-
-      if(response.pageCount > 1) {
-        loadAdditionalMarketTypePages();
-      }
-      else {
-        checkMarketBrowserLoaded();
-      }
-    }
-
-    function error(response) {
-      $log.error('initMarketTypes CREST error: ' + JSON.stringify(response));
+          if(response.pageCount > 1) {
+            loadAdditionalMarketTypePages();
+          }
+          else {
+            checkMarketBrowserLoaded();
+          }
+        })
+        .error((response) => {
+          $log.error('initMarketTypes CREST error: ' + JSON.stringify(response));
+        });
     }
   }
 
   function loadAdditionalMarketTypePages() {
     for(let i = 2; i <= vm.init.marketTypePageCount; i++) {
       vm.init.marketTypePromises.push(crestAPIService.getAllMarketTypes(i)
-        .success(success)
-        .error(error));
-    }
+        .success((response) => {
+          vm.init.initCalls += 1;
+          let itemsToAdd = [];
 
-    function success(response) {
-      vm.init.initCalls += 1;
-      let itemsToAdd = [];
+          response.items.forEach(function(item) {
+            itemsToAdd.push(item.type);
+          });
 
-      response.items.forEach(function(item) {
-        itemsToAdd.push(item.type);
-      });
-
-      vm.form.marketTypes = vm.form.marketTypes.concat(itemsToAdd);
-    }
-
-    function error(response) {
-      $log.error('CREST error: ' + JSON.stringify(response));
+          vm.form.marketTypes = vm.form.marketTypes.concat(itemsToAdd);
+        })
+        .error((response) => {
+          $log.error('CREST error: ' + JSON.stringify(response));
+        }));
     }
 
     // Await outstanding market type queries
@@ -219,10 +215,22 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
         if(response.days) {
           // Reset series
           vm.ohlc.config.series = [];
-          // Use the OHLC resource data to create a highstock candlestick chart
+          vm.priceHistory.config.series = [];
+          // Add candlestick chart for OHLC
           vm.ohlc.config.series.push(marketChartsService.createOHLCSeries(response.days));
           // Add average volume chart
           vm.ohlc.config.series.push(marketChartsService.createOHLCVolumeSeries(response.days));
+          // Add average line for price History
+          vm.priceHistory.config.series.push(marketChartsService.createAverageSeries(response.days));
+          // Add 5 day SMA line for price history
+          vm.priceHistory.config.series.push(marketChartsService.create5DaySMASeries(response.days));
+          // Add 20 day SMA line for price history
+          vm.priceHistory.config.series.push(marketChartsService.create20DaySMASeries(response.days));
+          // Add upper std dev for price history
+          vm.priceHistory.config.series.push(marketChartsService.createUpperStdDevSeries(response.days));
+          // Add lower std dev for price history
+          vm.priceHistory.config.series.push(marketChartsService.createLowerStdDevSeries(response.days));
+          $log.debug(vm.priceHistory.config.series);
           // Fire analysis successful event
           $scope.$broadcast(EVENT_ANALYSIS_SUCCESSFUL);
         }
