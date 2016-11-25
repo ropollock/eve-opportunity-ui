@@ -1,4 +1,4 @@
-function marketChartsService($timeout, $log) {
+function marketChartsService($timeout, $log, numbers) {
   'ngInject';
 
   const service = {};
@@ -13,8 +13,10 @@ function marketChartsService($timeout, $log) {
   service.createDefaultPriceHistoryConfig = createDefaultPriceHistoryConfig;
   service.createAverageSeries = createAverageSeries;
   service.create20DaySMASeries = create20DaySMASeries;
-  service.createLowerStdDevSeries = createLowerStdDevSeries;
-  service.createUpperStdDevSeries = createUpperStdDevSeries;
+  service.createUpperMovingBollingerBandSeries = createUpperMovingBollingerBandSeries;
+  service.createLowerMovingBollingerBandSeries = createLowerMovingBollingerBandSeries;
+  service.createUpperBollingerBandSeries = createUpperBollingerBandSeries;
+  service.createLowerBollingerBandSeries = createLowerBollingerBandSeries;
 
   return service;
 
@@ -152,55 +154,72 @@ function marketChartsService($timeout, $log) {
   }
 
   function create5DaySMASeries(days) {
-    return {
-      name: '5 day average',
-      data: calcMovingAvg(daysToAverages(days), 5),
-      tooltip: {
-        valueDecimals: 1
-      }
-    };
+    return createLineSeries(calcMovingAvg(daysToAverages(days), 5), '5 day moving average');
   }
 
   function create20DaySMASeries(days) {
-    return {
-      name: '5 day average',
-      data: calcMovingAvg(daysToAverages(days), 20),
-      tooltip: {
-        valueDecimals: 1
-      }
-    };
+    return createLineSeries(calcMovingAvg(daysToAverages(days), 20), '20 day moving average');
   }
 
   function createAverageSeries(days) {
+    return createLineSeries(daysToAverages(days), 'average');
+  }
+
+  function createUpperBollingerBandSeries(days) {
+    return createDashedLineSeries(daysToUpperStdDev(days), 'upper standard deviation');
+  }
+
+  function createLowerBollingerBandSeries(days) {
+    return createDashedLineSeries(daysToLowerStdDev(days), 'lower standard deviation');
+  }
+
+  function createUpperMovingBollingerBandSeries(days, interval, bandMagnitude = 2) {
+    let sma = calcMovingAvg(daysToAverages(days), interval);
+    let stdDevInterval = calcMovingStdDev(daysToAverages(days), interval);
+    let upperBand = calcUpperBollingerBand(sma, stdDevInterval, bandMagnitude);
+
+    return createDashedLineSeries(upperBand, interval + ' day upper standard deviation average');
+  }
+
+  function createLowerMovingBollingerBandSeries(days, interval, bandMagnitude = 2) {
+    let sma = calcMovingAvg(daysToAverages(days), interval);
+    let stdDevInterval = calcMovingStdDev(daysToAverages(days), interval);
+    let lowerBand = calcLowerBollingerBand(sma, stdDevInterval, bandMagnitude);
+
+    return createDashedLineSeries(lowerBand, interval +' day lower standard deviation average');
+  }
+
+  function createLineSeries(data = [], name = '') {
     return {
-      name: 'average',
-      data: daysToAverages(days),
+      name: name,
+      data: data,
       tooltip: {
         valueDecimals: 1
       }
     };
   }
 
-  function createUpperStdDevSeries(days) {
+  function createDashedLineSeries(data = [], name = '') {
     return {
-      name: 'upper standard deviation',
+      name: name,
       dashStyle: 'longdash',
-      data: daysToUpperStdDev(days),
+      data: data,
       tooltip: {
         valueDecimals: 1
       }
-    };
+    }
   }
 
-  function createLowerStdDevSeries(days) {
-    return {
-      name: 'lower standard deviation',
-      dashStyle: 'longdash',
-      data: daysToLowerStdDev(days),
-      tooltip: {
-        valueDecimals: 1
-      }
-    };
+  function calcUpperBollingerBand(sma, stdDevInterval, magnitude) {
+    return sma.map((day, index) => {
+      return {x: day.x, y: day.y + (stdDevInterval[index].y * magnitude)};
+    });
+  }
+
+  function calcLowerBollingerBand(sma, stdDevInterval, magnitude) {
+    return sma.map((day, index) => {
+      return {x: day.x, y: day.y - (stdDevInterval[index].y * magnitude)};
+    });
   }
 
   function daysToUpperStdDev(days) {
@@ -239,10 +258,33 @@ function marketChartsService($timeout, $log) {
         return {x: each.x, y: sum / n};
       }
       else {
-        // Insufficient data to calculate average, return undefined for that day.
+        // Insufficient data to calculate average, return undefined for that interval.
         return {x: each.x, y: undefined};
       }
     });
+  }
+
+  function calcMovingStdDev(points, n) {
+    return points.map((each, index, arr) => {
+      const fromIndex = index -n;
+
+      if(fromIndex >= 0) {
+        // Splice the period from the array.
+        let subSeq = arr.slice(fromIndex, index).map((point) => {
+          return point.y;
+        });
+
+        // Get standard deviation
+        const stdDev = numbers.statistic.standardDev(subSeq);
+
+        // Return point standard deviation
+        return {x: each.x, y: stdDev};
+      }
+      else {
+        // Insufficient data to calculate standard deviation for that interval.
+        return {x: each.x, y: undefined};
+      }
+    })
   }
 }
 

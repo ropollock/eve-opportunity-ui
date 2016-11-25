@@ -222,15 +222,21 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
           vm.ohlc.config.series.push(marketChartsService.createOHLCVolumeSeries(response.days));
           // Add average line for price History
           vm.priceHistory.config.series.push(marketChartsService.createAverageSeries(response.days));
-          // Add 5 day SMA line for price history
-          vm.priceHistory.config.series.push(marketChartsService.create5DaySMASeries(response.days));
-          // Add 20 day SMA line for price history
-          vm.priceHistory.config.series.push(marketChartsService.create20DaySMASeries(response.days));
           // Add upper std dev for price history
-          vm.priceHistory.config.series.push(marketChartsService.createUpperStdDevSeries(response.days));
+          vm.priceHistory.config.series.push(marketChartsService.createUpperBollingerBandSeries(response.days));
           // Add lower std dev for price history
-          vm.priceHistory.config.series.push(marketChartsService.createLowerStdDevSeries(response.days));
-          $log.debug(vm.priceHistory.config.series);
+          vm.priceHistory.config.series.push(marketChartsService.createLowerBollingerBandSeries(response.days));
+          // Add 5 day SMA line for price history
+          //vm.priceHistory.config.series.push(marketChartsService.create5DaySMASeries(response.days));
+          // Add 5 day upper std dev for price history
+          //vm.priceHistory.config.series.push(
+          //  marketChartsService.createUpperMovingBollingerBandSeries(response.days, 5));
+          // Add 5 day lower std dev for price history
+          //vm.priceHistory.config.series.push(
+          //  marketChartsService.createLowerMovingBollingerBandSeries(response.days, 5));
+          // Add 20 day SMA line for price history
+          //vm.priceHistory.config.series.push(marketChartsService.create20DaySMASeries(response.days));
+
           // Fire analysis successful event
           $scope.$broadcast(EVENT_ANALYSIS_SUCCESSFUL);
         }
