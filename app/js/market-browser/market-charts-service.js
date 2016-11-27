@@ -74,13 +74,19 @@ function marketChartsService($timeout, $log, numbers) {
 
   function createDefaultPriceHistoryConfig() {
     return {
-      title: {
-        text: 'Price History'
-      },
       series: [],
       options: {
+        chart: {
+          zoomType: 'x'
+        },
         rangeSelector: {
-          selected: 4
+          enabled: true
+        },
+        navigator: {
+          enabled: true
+        },
+        scrollbar: {
+          enabled: false
         },
         yAxis: {
           labels: {

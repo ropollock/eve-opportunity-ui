@@ -30,7 +30,12 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
   };
 
   vm.priceHistory = {
-    config: marketChartsService.createDefaultPriceHistoryConfig()
+    config: marketChartsService.createDefaultPriceHistoryConfig(),
+    data: {
+      averageSeries: [],
+      sma5DaySeries: [],
+      sma20DaySeries: []
+    }
   };
 
   vm.init = {
@@ -241,7 +246,7 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
           $scope.$broadcast(EVENT_ANALYSIS_SUCCESSFUL);
         }
         else {
-          $log.error('Unable to build OOHLC chart from OHLC response.');
+          $log.error('Unable to build OHLC chart from OHLC response.');
           throw new Error('Unable to build OHLC chart from OHLC response. Response:' + response);
         }
       })

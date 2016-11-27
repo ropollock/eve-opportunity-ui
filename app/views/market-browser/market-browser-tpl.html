@@ -1,65 +1,80 @@
 <div class="container">
-    <form ng-submit="form.analysis()" name="searchForm">
+  <form ng-submit="form.analysis()" name="searchForm">
     <div class="row">
-        <div class="col-md-6">
-            <md-autocomplete ng-disabled="marketBrowserCtrl.form.loading" spellcheck="false"
-                             md-selected-item-change="marketBrowserCtrl.form.analysis()" flex=""
-                             required="true" md-select-on-match="true" md-autoselect="true"
-                             md-no-cache="marketBrowserCtrl.form.autocompleteNoCache" md-input-name="tradeHubAutoComplete"
-                             md-input-minlength="3" md-selected-item="marketBrowserCtrl.form.selectedTradeHub"
-                             md-search-text="marketBrowserCtrl.form.tradeHubSearchText"
-                             md-items="item in marketBrowserCtrl.form.queryTradeHubs(marketBrowserCtrl.form.tradeHubSearchText)"
-                             md-item-text="item.name"
-                             md-floating-label="Trade Hub">
-                <md-item-template>
-                    <span md-highlight-text="marketBrowserCtrl.form.tradeHubSearchText">{{item.name}}</span>
-                </md-item-template>
-                <div ng-messages="searchForm.tradeHubAutoComplete.$error" ng-if="searchForm.tradeHubAutoComplete.$touched">
-                    <div ng-message="required">Select a trade hub!</div>
-                    <div ng-message="minlength">Your entry is not long enough.</div>
-                </div>
-            </md-autocomplete>
-        </div>
-        <div class="col-md-6">
-            <md-autocomplete ng-disabled="marketBrowserCtrl.form.loading" spellcheck="false"
-                             md-selected-item-change="marketBrowserCtrl.form.analysis()" flex=""
-                             required="true" md-select-on-match="true" md-autoselect="true"
-                             md-no-cache="marketBrowserCtrl.form.autocompleteNoCache" md-input-name="itemAutoComplete"
-                             md-input-minlength="3" md-selected-item="marketBrowserCtrl.form.selectedItem"
-                             md-search-text="marketBrowserCtrl.form.itemSearchText"
-                             md-items="item in marketBrowserCtrl.form.queryItems(marketBrowserCtrl.form.itemSearchText)"
-                             md-item-text="item.name" md-floating-label="Item">
-                <md-item-template>
-                    <span md-highlight-text="marketBrowserCtrl.form.itemSearchText">{{item.name}}</span>
-                </md-item-template>
-                <div ng-messages="searchForm.itemAutoComplete.$error" ng-if="searchForm.itemAutoComplete.$touched">
-                    <div ng-message="required">Select an item!</div>
-                    <div ng-message="minlength">Your entry is not long enough.</div>
-                </div>
-            </md-autocomplete>
-        </div>
+      <div class="col-md-6">
+        <md-autocomplete ng-disabled="marketBrowserCtrl.form.loading" spellcheck="false"
+                         md-selected-item-change="marketBrowserCtrl.form.analysis()" flex=""
+                         required="true" md-select-on-match="true" md-autoselect="true"
+                         md-no-cache="marketBrowserCtrl.form.autocompleteNoCache" md-input-name="tradeHubAutoComplete"
+                         md-input-minlength="3" md-selected-item="marketBrowserCtrl.form.selectedTradeHub"
+                         md-search-text="marketBrowserCtrl.form.tradeHubSearchText"
+                         md-items="item in marketBrowserCtrl.form.queryTradeHubs(marketBrowserCtrl.form.tradeHubSearchText)"
+                         md-item-text="item.name"
+                         md-floating-label="Trade Hub">
+          <md-item-template>
+            <span md-highlight-text="marketBrowserCtrl.form.tradeHubSearchText">{{item.name}}</span>
+          </md-item-template>
+          <div ng-messages="searchForm.tradeHubAutoComplete.$error" ng-if="searchForm.tradeHubAutoComplete.$touched">
+            <div ng-message="required">Select a trade hub!</div>
+            <div ng-message="minlength">Your entry is not long enough.</div>
+          </div>
+        </md-autocomplete>
+      </div>
+      <div class="col-md-6">
+        <md-autocomplete ng-disabled="marketBrowserCtrl.form.loading" spellcheck="false"
+                         md-selected-item-change="marketBrowserCtrl.form.analysis()" flex=""
+                         required="true" md-select-on-match="true" md-autoselect="true"
+                         md-no-cache="marketBrowserCtrl.form.autocompleteNoCache" md-input-name="itemAutoComplete"
+                         md-input-minlength="3" md-selected-item="marketBrowserCtrl.form.selectedItem"
+                         md-search-text="marketBrowserCtrl.form.itemSearchText"
+                         md-items="item in marketBrowserCtrl.form.queryItems(marketBrowserCtrl.form.itemSearchText)"
+                         md-item-text="item.name" md-floating-label="Item">
+          <md-item-template>
+            <span md-highlight-text="marketBrowserCtrl.form.itemSearchText">{{item.name}}</span>
+          </md-item-template>
+          <div ng-messages="searchForm.itemAutoComplete.$error" ng-if="searchForm.itemAutoComplete.$touched">
+            <div ng-message="required">Select an item!</div>
+            <div ng-message="minlength">Your entry is not long enough.</div>
+          </div>
+        </md-autocomplete>
+      </div>
     </div>
-    </form>
+  </form>
 
-    <div class="row" data-ng-if="marketBrowserCtrl.form.loading" ng-include="'loading-tpl.html'"></div>
-
-  <div class="row" data-ng-if="!marketBrowserCtrl.form.loading && marketBrowserCtrl.analysis.show">
-    <div class="col-md-12"><div class="shadow-sm"><highchart id="chart1" config="marketBrowserCtrl.ohlc.config"></highchart></div></div>
-  </div>
-
-  <div class="row"><div class="col-md-12">&nbsp;</div></div>
+  <div class="row" data-ng-if="marketBrowserCtrl.form.loading" ng-include="'loading-tpl.html'"></div>
 
   <div class="row" data-ng-if="!marketBrowserCtrl.form.loading && marketBrowserCtrl.analysis.show">
-    <div class="col-md-12"><div class="shadow-sm"><highchart id="priceHistoryChart" config="marketBrowserCtrl.priceHistory.config"></highchart></div></div>
+    <div class="col-md-12">
+      <div class="shadow-sm">
+        <highchart id="chart1" config="marketBrowserCtrl.ohlc.config"></highchart>
+      </div>
+    </div>
   </div>
 
-  <div class="row"><div class="col-md-12">&nbsp;</div></div>
+  <div class="row">
+    <div class="col-md-12">&nbsp;</div>
+  </div>
 
-    <!--<div class="row shadow-sm" data-ng-if="!form.loading && analysis.priceHistory.data">
-        <div class="col-md-12">
-            <div price-history history="analysis.priceHistory.charts">
-
-            </div>
+  <div class="row" data-ng-if="!marketBrowserCtrl.form.loading && marketBrowserCtrl.analysis.show">
+    <div class="col-md-12">
+      <div class="shadow-sm main-background">
+        <div class="row">
+          <div class="col-md-4 pull-left padding"><h1>Price History</h1></div>
+          <div class="col-md-4 pull-right">
+            <md-select ng-model="marketBrowserCtrl.form.priceHistory.type" placeholder="Select an interval" class="md-no-underline"
+                       style="padding: 10px;">
+              <md-option value="avg">Average</md-option>
+              <md-option value="sma5">5 Day Moving Average</md-option>
+              <md-option value="sma20">20 Day Moving Average</md-option>
+            </md-select>
+          </div>
         </div>
-    </div>-->
+        <highchart id="priceHistoryChart" config="marketBrowserCtrl.priceHistory.config"></highchart>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">&nbsp;</div>
+  </div>
 </div>
