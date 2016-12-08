@@ -172,11 +172,11 @@ function marketChartsService($timeout, $log, numbers) {
   }
 
   function createUpperBollingerBandSeries(days) {
-    return createDashedLineSeries(daysToUpperStdDev(days), 'upper standard deviation');
+    return createDashedLineSeries(daysToUpperStdDev(days), 'upper variance');
   }
 
   function createLowerBollingerBandSeries(days) {
-    return createDashedLineSeries(daysToLowerStdDev(days), 'lower standard deviation');
+    return createDashedLineSeries(daysToLowerStdDev(days), 'lower variance');
   }
 
   function createUpperMovingBollingerBandSeries(days, interval, bandMagnitude = 2) {
