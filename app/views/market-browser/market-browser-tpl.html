@@ -59,13 +59,13 @@
     <div class="col-md-12">
       <div class="shadow-sm main-background">
         <div class="row">
-          <div class="col-md-4 pull-left padding"><h1>Price History</h1></div>
+          <div class="col-md-4 pull-left"><h1 class="padding">Price History</h1></div>
           <div class="col-md-4 pull-right">
-            <md-select ng-model="marketBrowserCtrl.form.priceHistory.type" placeholder="Select an interval" class="md-no-underline"
-                       style="padding: 10px;">
-              <md-option value="avg">Average</md-option>
-              <md-option value="sma5">5 Day Moving Average</md-option>
-              <md-option value="sma20">20 Day Moving Average</md-option>
+            <md-select ng-model="marketBrowserCtrl.form.priceHistory.selectedType"
+                       ng-change="marketBrowserCtrl.form.priceHistory.onPriceHistoryTypeChange()"
+                       placeholder="Select an interval" class="md-no-underline padding">
+              <md-option ng-repeat="type in marketBrowserCtrl.form.priceHistory.types"
+                         ng-value="type.value">{{type.name}}</md-option>
             </md-select>
           </div>
         </div>

@@ -2,11 +2,17 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
   'ngInject'
 
   const vm = this;
+  // Event constants
   const EVENT_QUERY_ANALYSIS = 'eventQueryAnalysis';
   const EVENT_ANALYSIS_COMPLETE = 'eventAnalysisComplete';
   const EVENT_ANALYSIS_SUCCESSFUL = 'eventAnalysisSuccessful';
   const EVENT_ANALYSIS_FAILED = 'eventAnalysisFailed';
   const EVENT_INVALID_QUERY = 'eventInvalidQuery';
+
+  // Price History constants
+  const PRICE_HISTORY_AVERAGE = 'priceHistoryAverage';
+  const PRICE_HISTORY_SMA5 = 'priceHistorySMA5';
+  const PRICE_HISTORY_SMA20 = 'priceHistorySMA20';
 
   vm.form = {
     loading: true,
@@ -18,7 +24,14 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
     tradeHubSearchText: '',
     selectedTradeHub: null,
     queryTradeHubs: query => {return marketBrowserService.queryTradeHubs(query, vm.form.tradeHubs)},
-    analysis: analysis
+    analysis: analysis,
+    priceHistory: {
+      selectedType: PRICE_HISTORY_AVERAGE,
+      types: [{name: 'Average', value: PRICE_HISTORY_AVERAGE},
+        {name: '5 day moving average', value: PRICE_HISTORY_SMA5},
+        {name: '20 day moving average', value: PRICE_HISTORY_SMA20}],
+      onPriceHistoryTypeChange: onPriceHistoryTypeChange
+    }
   };
 
   vm.analysis = {
@@ -78,6 +91,7 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
   function onAnalysisSuccessful() {
     $scope.$on(EVENT_ANALYSIS_SUCCESSFUL, () => {
       vm.analysis.show = true;
+      onPriceHistoryTypeChange();
     });
   }
 
@@ -93,6 +107,24 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
     $scope.$on(EVENT_INVALID_QUERY, () => {
       vm.analysis.show = false;
     });
+  }
+
+  function onPriceHistoryTypeChange() {
+    if(vm.form.priceHistory.selectedType === PRICE_HISTORY_AVERAGE) {
+      vm.priceHistory.config.series = vm.priceHistory.data.averageSeries;
+    }
+    else if(vm.form.priceHistory.selectedType === PRICE_HISTORY_SMA5) {
+      vm.priceHistory.config.series = vm.priceHistory.data.sma5DaySeries;
+    }
+    else if(vm.form.priceHistory.selectedType === PRICE_HISTORY_SMA20) {
+      vm.priceHistory.config.series = vm.priceHistory.data.sma20DaySeries;
+    }
+    else {
+      $log.error('Unknown price history type selected.', vm.form.priceHistory.selectedType);
+    }
+
+    // This is a work around for a bug in ng highcharts; the navigator doesn't update without this
+    vm.priceHistory.config.options.toggleModify = !vm.priceHistory.config.options.toggleModify;
   }
 
   function checkMarketBrowserLoaded() {
@@ -218,29 +250,44 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
     apiService.getOHLC(selectedItem.id, selectedTradeHub.name)
       .success((response) => {
         if(response.days) {
+          // Set a default price history type for consistency
+          vm.form.priceHistory.selectedType = PRICE_HISTORY_AVERAGE;
           // Reset series
           vm.ohlc.config.series = [];
           vm.priceHistory.config.series = [];
+          vm.priceHistory.data.averageSeries = [];
+          vm.priceHistory.data.sma5DaySeries = [];
+          vm.priceHistory.data.sma20DaySeries = [];
+
+          // @TODO move this into the service and return each series set
+          // @TODO look into using highcharts 'setData'
+
           // Add candlestick chart for OHLC
           vm.ohlc.config.series.push(marketChartsService.createOHLCSeries(response.days));
           // Add average volume chart
           vm.ohlc.config.series.push(marketChartsService.createOHLCVolumeSeries(response.days));
           // Add average line for price History
-          vm.priceHistory.config.series.push(marketChartsService.createAverageSeries(response.days));
+          vm.priceHistory.data.averageSeries.push(marketChartsService.createAverageSeries(response.days));
           // Add upper std dev for price history
-          vm.priceHistory.config.series.push(marketChartsService.createUpperBollingerBandSeries(response.days));
+          vm.priceHistory.data.averageSeries.push(marketChartsService.createUpperBollingerBandSeries(response.days));
           // Add lower std dev for price history
-          vm.priceHistory.config.series.push(marketChartsService.createLowerBollingerBandSeries(response.days));
+          vm.priceHistory.data.averageSeries.push(marketChartsService.createLowerBollingerBandSeries(response.days));
           // Add 5 day SMA line for price history
-          //vm.priceHistory.config.series.push(marketChartsService.create5DaySMASeries(response.days));
+          vm.priceHistory.data.sma5DaySeries.push(marketChartsService.create5DaySMASeries(response.days));
           // Add 5 day upper std dev for price history
-          //vm.priceHistory.config.series.push(
-          //  marketChartsService.createUpperMovingBollingerBandSeries(response.days, 5));
+          vm.priceHistory.data.sma5DaySeries.push(
+            marketChartsService.createUpperMovingBollingerBandSeries(response.days, 5));
           // Add 5 day lower std dev for price history
-          //vm.priceHistory.config.series.push(
-          //  marketChartsService.createLowerMovingBollingerBandSeries(response.days, 5));
+          vm.priceHistory.data.sma5DaySeries.push(
+            marketChartsService.createLowerMovingBollingerBandSeries(response.days, 5));
           // Add 20 day SMA line for price history
-          //vm.priceHistory.config.series.push(marketChartsService.create20DaySMASeries(response.days));
+          vm.priceHistory.data.sma20DaySeries.push(marketChartsService.create20DaySMASeries(response.days));
+          // Add 20 day upper std dev for price history
+          vm.priceHistory.data.sma20DaySeries.push(
+            marketChartsService.createUpperMovingBollingerBandSeries(response.days, 20));
+          // Add 20 day lower std dev for price history
+          vm.priceHistory.data.sma20DaySeries.push(
+            marketChartsService.createLowerMovingBollingerBandSeries(response.days, 20));
 
           // Fire analysis successful event
           $scope.$broadcast(EVENT_ANALYSIS_SUCCESSFUL);

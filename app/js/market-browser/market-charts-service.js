@@ -65,6 +65,7 @@ function marketChartsService($timeout, $log, numbers) {
       },
       useHighStocks: true,
       func: function(chart) {
+        // This is a workaround for a bug in ng highcharts
         $timeout(function() {
           chart.reflow();
         }, 0);
@@ -77,7 +78,8 @@ function marketChartsService($timeout, $log, numbers) {
       series: [],
       options: {
         chart: {
-          zoomType: 'x'
+          zoomType: 'x',
+          toggleModify : false
         },
         rangeSelector: {
           enabled: true
@@ -105,6 +107,7 @@ function marketChartsService($timeout, $log, numbers) {
       },
       useHighStocks: true,
       func: function(chart) {
+        // This is a workaround for a bug in ng highcharts
         $timeout(function() {
           chart.reflow();
         }, 0);
@@ -184,7 +187,7 @@ function marketChartsService($timeout, $log, numbers) {
     let stdDevInterval = calcMovingStdDev(daysToAverages(days), interval);
     let upperBand = calcUpperBollingerBand(sma, stdDevInterval, bandMagnitude);
 
-    return createDashedLineSeries(upperBand, interval + ' day upper standard deviation average');
+    return createDashedLineSeries(upperBand, interval + ' day upper variance');
   }
 
   function createLowerMovingBollingerBandSeries(days, interval, bandMagnitude = 2) {
@@ -192,7 +195,7 @@ function marketChartsService($timeout, $log, numbers) {
     let stdDevInterval = calcMovingStdDev(daysToAverages(days), interval);
     let lowerBand = calcLowerBollingerBand(sma, stdDevInterval, bandMagnitude);
 
-    return createDashedLineSeries(lowerBand, interval +' day lower standard deviation average');
+    return createDashedLineSeries(lowerBand, interval +' day lower variance');
   }
 
   function createLineSeries(data = [], name = '') {
