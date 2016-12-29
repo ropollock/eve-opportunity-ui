@@ -30,28 +30,50 @@ function priceHistoryController($scope, $log, marketChartsService) {
 
   function activate() {
     watchForUpdatedDays();
-    vm.form.selectedType = PRICE_HISTORY_AVERAGE;
-    loadType(vm.config, vm.data, PRICE_HISTORY_AVERAGE);
+    vm.form.selectedType = getDefaultType();
+    loadType(vm.config, vm.data, vm.form.selectedType);
   }
 
+  /**
+   * watchForUpdatedDays
+   *
+   * Applies a watch for updated OHLC days and regenerates series data accordingly.
+   */
   function watchForUpdatedDays() {
     $scope.$watch(() => {return $scope.priceHistory.days}, (days) => {
       if(days) {
         clearSeries(vm.config);
         clearSeriesData(vm.data);
         generateSeries(vm.data, days);
-        vm.form.selectedType = PRICE_HISTORY_AVERAGE;
-        loadType(vm.config, vm.data, PRICE_HISTORY_AVERAGE);
+        vm.form.selectedType = getDefaultType();
+        loadType(vm.config, vm.data, vm.form.selectedType);
       }
     });
   }
 
+  /**
+   * generateSeries
+   *
+   * Sets a view model data object's averageSeries, sma5DaySeries, and sma20DaySeries properties
+   * generated using an OHLC days collection.
+   *
+   * @param data
+   * @param days
+   */
   function generateSeries(data, days) {
     data.averageSeries = generateAverageSeries(days);
     data.sma5DaySeries = generateSMA5DaySeries(days);
     data.sma20DaySeries = generateSMA20DaySeries(days);
   }
 
+  /**
+   * generateAverageSeries
+   *
+   * Creates an array of highchart series for the average along with upper and lower Bollinger bands.
+   *
+   * @param days
+   * @return {Array}
+   */
   function generateAverageSeries(days) {
     let averageSeries = [];
     // Add average line for price History
@@ -63,6 +85,15 @@ function priceHistoryController($scope, $log, marketChartsService) {
     return averageSeries;
   }
 
+  /**
+   * generateSMA5DaySeries
+   *
+   * Creates an array of highchart series for a simple moving average of 5 days along with
+   * upper and lower Bollinger bands.
+   *
+   * @param days
+   * @return {Array}
+   */
   function generateSMA5DaySeries(days) {
     let sma5DaySeries = [];
     let dayCount = 5;
@@ -77,6 +108,15 @@ function priceHistoryController($scope, $log, marketChartsService) {
     return sma5DaySeries;
   }
 
+  /**
+   * generateSMA20DaySeries
+   *
+   * Creates an array of highchart series for a simple moving average of 20 days along with
+   * upper and lower Bollinger bands.
+   *
+   * @param days
+   * @return {Array}
+   */
   function generateSMA20DaySeries(days) {
     let sma20DaySeries = [];
     let dayCount = 20;
@@ -91,6 +131,28 @@ function priceHistoryController($scope, $log, marketChartsService) {
     return sma20DaySeries;
   }
 
+  /**
+   * getDefaultType
+   *
+   * Returns the default price history type. (Average)
+   *
+   * @return {string}
+   */
+  function getDefaultType() {
+    return PRICE_HISTORY_AVERAGE;
+  }
+
+  /**
+   * loadType
+   *
+   * Sets the series property of a config object to the corresponding data set by matching a type.
+   * Applies a work around for a bug in the highcharts directive. The work around toggles a chart option
+   * to ensure the directive refreshes properly.
+   *
+   * @param config
+   * @param data
+   * @param selectedType
+   */
   function loadType(config, data, selectedType) {
     if(selectedType === PRICE_HISTORY_AVERAGE) {
       config.series = data.averageSeries;
@@ -102,17 +164,31 @@ function priceHistoryController($scope, $log, marketChartsService) {
       config.series = data.sma20DaySeries;
     }
     else {
-      $log.error('Unknown price history type selected.', selectedType);
+      $log.error('Unrecognized price history type selected.', selectedType);
     }
 
     // This is a work around for a bug in ng highcharts; the navigator doesn't update without this
     config.options.chart.toggleModify = !config.options.chart.toggleModify;
   }
 
+  /**
+   * clearSeries
+   *
+   * Sets the series property of a config object to an empty array.
+   *
+   * @param config
+   */
   function clearSeries(config) {
     config.series = [];
   }
 
+  /**
+   * clearSeriesData
+   *
+   * Sets averageSeries, sma5DaySeries, and sma20DaySeries to empty arrays.
+   *
+   * @param {Object} data
+   */
   function clearSeriesData(data) {
     data.averageSeries = [];
     data.sma5DaySeries = [];

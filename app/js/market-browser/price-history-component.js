@@ -4,7 +4,7 @@ function priceHistoryComponent() {
     controllerAs: 'priceHistory',
     controller: 'priceHistoryController',
     bindings: {
-      days: '='
+      days: '<'
     }
   };
 }

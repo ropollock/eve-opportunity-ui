@@ -1,7 +1,7 @@
 function marketBrowserController($scope, $log, marketBrowserService, apiService, crestAPIService, $q) {
   'ngInject'
-
   const vm = this;
+
   // Event constants
   const EVENT_QUERY_ANALYSIS = 'eventQueryAnalysis';
   const EVENT_ANALYSIS_COMPLETE = 'eventAnalysisComplete';
@@ -9,6 +9,7 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
   const EVENT_ANALYSIS_FAILED = 'eventAnalysisFailed';
   const EVENT_INVALID_QUERY = 'eventInvalidQuery';
 
+  // Contains form data for the market browser
   vm.form = {
     loading: true,
     marketTypes: [],
@@ -23,10 +24,12 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
     showAnalysis: false
   };
 
+  // Contains the most recent request for OHLC data from eve op API
   vm.ohlc = {
     days: []
   };
 
+  // Contains persisting initialization values for the market browser
   vm.init = {
     marketTypePageCount: 1,
     initCalls: 0,
@@ -37,7 +40,6 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
   activate();
 
   function activate() {
-    $log.info('Activating MarketBrowserController.');
     initEvents();
     initMarketTypes();
     initTradeHubs();
@@ -86,13 +88,10 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
   // @TODO make this more pure
   function checkMarketBrowserLoaded() {
     if(vm.init.initCalls >= vm.init.initCallCount) {
-      $log.info('Market types have been loaded.');
       vm.form.loading = false;
-
       if(vm.form.tradeHubs.length > 0) {
         marketBrowserService.cacheTradeHubs(vm.form.tradeHubs);
       }
-
       if(vm.form.marketTypes.length > 0) {
         marketBrowserService.cacheMarketTypes(vm.form.marketTypes);
       }
@@ -184,7 +183,7 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
    *
    * Checks that an item and a trade hub are selected in the form.
    *
-   * @param form
+   * @param {Object} form
    * @returns boolean
    */
   function isQueryReady(form) {
@@ -192,6 +191,16 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
     return (selectedItem && selectedTradeHub);
   }
 
+  /**
+   * requestAnalysis
+   *
+   * Performs an analysis lifecycle that requests OHLC data from Eve Opportunity API and updates
+   * the view model with the OHLC days. A check of isQueryReady is performed before analysis.
+   * If this check fails, a broadcast of EVENT_INVALID_QUERY event will occur and then return.
+   *
+   * @param {Object} form
+   * @return void
+   */
   function requestAnalysis(form) {
     if(!isQueryReady(form)) {
       // Fire invalid query event and no op

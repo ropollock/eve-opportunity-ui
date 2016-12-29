@@ -24,9 +24,12 @@ function marketChartsService($timeout, $log, numbers) {
     return {
       series: [],
       title: {
-        text: 'OHLC'
+        text: 'Open High Low Close'
       },
       options : {
+        credits: {
+          enabled: false
+        },
         chart: {
           toggleModify : false,
           zoomType: 'x'
@@ -78,6 +81,9 @@ function marketChartsService($timeout, $log, numbers) {
     return {
       series: [],
       options: {
+        credits: {
+          enabled: false
+        },
         chart: {
           zoomType: 'x',
           toggleModify : false
