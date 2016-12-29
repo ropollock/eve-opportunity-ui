@@ -15,13 +15,13 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
     marketTypes: [],
     itemSearchText: '',
     selectedItem: null,
-    queryItems: query => {return marketBrowserService.queryItems(query, vm.form.marketTypes)},
     tradeHubs: [],
     tradeHubSearchText: '',
     selectedTradeHub: null,
+    showAnalysis: false,
+    queryItems: query => {return marketBrowserService.queryItems(query, vm.form.marketTypes)},
     queryTradeHubs: query => {return marketBrowserService.queryTradeHubs(query, vm.form.tradeHubs)},
-    requestAnalysis: requestAnalysis,
-    showAnalysis: false
+    requestAnalysis: requestAnalysis
   };
 
   // Contains the most recent request for OHLC data from eve op API
