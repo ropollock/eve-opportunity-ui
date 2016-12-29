@@ -1,4 +1,4 @@
-function marketBrowserController($scope, $log, marketBrowserService, apiService, crestAPIService, $q, marketChartsService) {
+function marketBrowserController($scope, $log, marketBrowserService, apiService, crestAPIService, $q) {
   'ngInject'
 
   const vm = this;
@@ -8,11 +8,6 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
   const EVENT_ANALYSIS_SUCCESSFUL = 'eventAnalysisSuccessful';
   const EVENT_ANALYSIS_FAILED = 'eventAnalysisFailed';
   const EVENT_INVALID_QUERY = 'eventInvalidQuery';
-
-  // Price History constants
-  const PRICE_HISTORY_AVERAGE = 'priceHistoryAverage';
-  const PRICE_HISTORY_SMA5 = 'priceHistorySMA5';
-  const PRICE_HISTORY_SMA20 = 'priceHistorySMA20';
 
   vm.form = {
     loading: true,
@@ -24,31 +19,12 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
     tradeHubSearchText: '',
     selectedTradeHub: null,
     queryTradeHubs: query => {return marketBrowserService.queryTradeHubs(query, vm.form.tradeHubs)},
-    analysis: analysis,
-    priceHistory: {
-      selectedType: PRICE_HISTORY_AVERAGE,
-      types: [{name: 'Average', value: PRICE_HISTORY_AVERAGE},
-        {name: '5 day moving average', value: PRICE_HISTORY_SMA5},
-        {name: '20 day moving average', value: PRICE_HISTORY_SMA20}],
-      onPriceHistoryTypeChange: onPriceHistoryTypeChange
-    }
-  };
-
-  vm.analysis = {
-    show: false
+    requestAnalysis: requestAnalysis,
+    showAnalysis: false
   };
 
   vm.ohlc = {
-    config: marketChartsService.createDefaultOHLCConfig()
-  };
-
-  vm.priceHistory = {
-    config: marketChartsService.createDefaultPriceHistoryConfig(),
-    data: {
-      averageSeries: [],
-      sma5DaySeries: [],
-      sma20DaySeries: []
-    }
+    days: []
   };
 
   vm.init = {
@@ -78,7 +54,7 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
   function onQueryAnalysis() {
     $scope.$on(EVENT_QUERY_ANALYSIS, () => {
       vm.form.loading = true;
-      vm.analysis.show = false;
+      vm.form.showAnalysis = false;
     });
   }
 
@@ -90,43 +66,24 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
 
   function onAnalysisSuccessful() {
     $scope.$on(EVENT_ANALYSIS_SUCCESSFUL, () => {
-      vm.analysis.show = true;
-      onPriceHistoryTypeChange();
+      vm.form.showAnalysis = true;
     });
   }
 
   function onAnalysisFailed() {
-    $scope.$on(EVENT_ANALYSIS_FAILED, (err) => {
-      $log.error(err);
+    $scope.$on(EVENT_ANALYSIS_FAILED, (error) => {
+      $log.error(error);
       // @TODO show error state
-      $log.error('Unable to query OHLC for : ' + error.item + ' : ' + error.tradeHub + ' ' + JSON.stringify(error.error));
     })
   }
 
   function onInvalidQuery() {
     $scope.$on(EVENT_INVALID_QUERY, () => {
-      vm.analysis.show = false;
+      vm.form.showAnalysis = false;
     });
   }
 
-  function onPriceHistoryTypeChange() {
-    if(vm.form.priceHistory.selectedType === PRICE_HISTORY_AVERAGE) {
-      vm.priceHistory.config.series = vm.priceHistory.data.averageSeries;
-    }
-    else if(vm.form.priceHistory.selectedType === PRICE_HISTORY_SMA5) {
-      vm.priceHistory.config.series = vm.priceHistory.data.sma5DaySeries;
-    }
-    else if(vm.form.priceHistory.selectedType === PRICE_HISTORY_SMA20) {
-      vm.priceHistory.config.series = vm.priceHistory.data.sma20DaySeries;
-    }
-    else {
-      $log.error('Unknown price history type selected.', vm.form.priceHistory.selectedType);
-    }
-
-    // This is a work around for a bug in ng highcharts; the navigator doesn't update without this
-    vm.priceHistory.config.options.toggleModify = !vm.priceHistory.config.options.toggleModify;
-  }
-
+  // @TODO make this more pure
   function checkMarketBrowserLoaded() {
     if(vm.init.initCalls >= vm.init.initCallCount) {
       $log.info('Market types have been loaded.');
@@ -142,6 +99,7 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
     }
   }
 
+  // @TODO make this more pure
   function initTradeHubs() {
     let cachedTradeHubs = marketBrowserService.getCachedTradeHubs();
     if(cachedTradeHubs !== null) {
@@ -161,7 +119,7 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
         });
     }
   }
-
+  // @TODO make this more pure
   function initMarketTypes() {
     let cachedMarketTypes = marketBrowserService.getCachedMarketTypes();
     if(cachedMarketTypes !== null) {
@@ -234,76 +192,59 @@ function marketBrowserController($scope, $log, marketBrowserService, apiService,
     return (selectedItem && selectedTradeHub);
   }
 
-  function analysis() {
-    if(!isQueryReady(vm.form)) {
+  function requestAnalysis(form) {
+    if(!isQueryReady(form)) {
       // Fire invalid query event and no op
       $scope.$broadcast(EVENT_INVALID_QUERY);
       return;
     }
 
+    // Pull out the item ID and trade hub name from the form.
+    let {id: itemId} = form.selectedItem;
+    let {name: tradeHubName} = form.selectedTradeHub;
+
     // Fire query analysis event
     $scope.$broadcast(EVENT_QUERY_ANALYSIS);
-    // Deconstruct the item and trade hub from the form
-    let {selectedItem, selectedTradeHub} = vm.form;
 
-    // Request an OHLC resource for the selected item and trade hub
-    apiService.getOHLC(selectedItem.id, selectedTradeHub.name)
+    requestOHLC(itemId, tradeHubName)
       .success((response) => {
-        if(response.days) {
-          // Set a default price history type for consistency
-          vm.form.priceHistory.selectedType = PRICE_HISTORY_AVERAGE;
-          // Reset series
-          vm.ohlc.config.series = [];
-          vm.priceHistory.config.series = [];
-          vm.priceHistory.data.averageSeries = [];
-          vm.priceHistory.data.sma5DaySeries = [];
-          vm.priceHistory.data.sma20DaySeries = [];
-
-          // @TODO move this into the service and return each series set
-          // @TODO look into using highcharts 'setData'
-
-          // Add candlestick chart for OHLC
-          vm.ohlc.config.series.push(marketChartsService.createOHLCSeries(response.days));
-          // Add average volume chart
-          vm.ohlc.config.series.push(marketChartsService.createOHLCVolumeSeries(response.days));
-          // Add average line for price History
-          vm.priceHistory.data.averageSeries.push(marketChartsService.createAverageSeries(response.days));
-          // Add upper std dev for price history
-          vm.priceHistory.data.averageSeries.push(marketChartsService.createUpperBollingerBandSeries(response.days));
-          // Add lower std dev for price history
-          vm.priceHistory.data.averageSeries.push(marketChartsService.createLowerBollingerBandSeries(response.days));
-          // Add 5 day SMA line for price history
-          vm.priceHistory.data.sma5DaySeries.push(marketChartsService.create5DaySMASeries(response.days));
-          // Add 5 day upper std dev for price history
-          vm.priceHistory.data.sma5DaySeries.push(
-            marketChartsService.createUpperMovingBollingerBandSeries(response.days, 5));
-          // Add 5 day lower std dev for price history
-          vm.priceHistory.data.sma5DaySeries.push(
-            marketChartsService.createLowerMovingBollingerBandSeries(response.days, 5));
-          // Add 20 day SMA line for price history
-          vm.priceHistory.data.sma20DaySeries.push(marketChartsService.create20DaySMASeries(response.days));
-          // Add 20 day upper std dev for price history
-          vm.priceHistory.data.sma20DaySeries.push(
-            marketChartsService.createUpperMovingBollingerBandSeries(response.days, 20));
-          // Add 20 day lower std dev for price history
-          vm.priceHistory.data.sma20DaySeries.push(
-            marketChartsService.createLowerMovingBollingerBandSeries(response.days, 20));
-
-          // Fire analysis successful event
-          $scope.$broadcast(EVENT_ANALYSIS_SUCCESSFUL);
-        }
-        else {
-          $log.error('Unable to build OHLC chart from OHLC response.');
-          throw new Error('Unable to build OHLC chart from OHLC response. Response:' + response);
-        }
+        // Update OHLC days data
+        vm.ohlc.days = response.days;
+        // Fire analysis successful event
+        $scope.$broadcast(EVENT_ANALYSIS_SUCCESSFUL);
       })
       .error((error) => {
+        $log.error('Error requesting OHLC data from API.', error);
         // Fire analysis failed event
-        $scope.$broadcast(EVENT_ANALYSIS_FAILED, {error: error, item: selectedItem.id, tradeHub: selectedItem.id});
+        $scope.$broadcast(EVENT_ANALYSIS_FAILED, {error: error, item: itemId, tradeHub: tradeHubName});
       })
       .finally(() => {
         // Fire analysis complete event
         $scope.$broadcast(EVENT_ANALYSIS_COMPLETE);
+      });
+  }
+
+  /**
+   * requestOHLC
+   *
+   * Takes an itemId and tradeHubName then returns an api request promise for OHLC data.
+   * OHLC data events are emitted upon success or failure of the request.
+   *
+   * @return promise
+   * @param {String} itemId
+   * @param {String} tradeHubName
+   */
+  function requestOHLC(itemId, tradeHubName) {
+      // Request an OHLC resource for the selected item and trade hub
+    return apiService.getOHLC(itemId, tradeHubName)
+      .success((response) => {
+        if(response.days) {
+          return {item: itemId, tradeHub: tradeHubName, response: response};
+        }
+        else {
+          return $q.reject(new Error('Unable to build OHLC chart from OHLC response. Response:'
+            + JSON.stringify(response)));
+        }
       });
   }
 }

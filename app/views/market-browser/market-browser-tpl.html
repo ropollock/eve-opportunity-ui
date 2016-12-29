@@ -1,9 +1,11 @@
 <div class="container">
-  <form ng-submit="form.analysis()" name="searchForm">
+  <form ng-submit="marketBrowserCtrl.form.requestAnalysis(marketBrowserCtrl.form)" name="searchForm">
     <div class="row">
       <div class="col-md-6">
-        <md-autocomplete ng-disabled="marketBrowserCtrl.form.loading" spellcheck="false"
-                         md-selected-item-change="marketBrowserCtrl.form.analysis()" flex=""
+        <md-autocomplete ng-disabled="marketBrowserCtrl.form.loading"
+                         spellcheck="false"
+                         md-selected-item-change="marketBrowserCtrl.form.requestAnalysis(marketBrowserCtrl.form)"
+                         flex=""
                          required="true" md-select-on-match="true" md-autoselect="true"
                          md-no-cache="marketBrowserCtrl.form.autocompleteNoCache" md-input-name="tradeHubAutoComplete"
                          md-input-minlength="3" md-selected-item="marketBrowserCtrl.form.selectedTradeHub"
@@ -22,7 +24,8 @@
       </div>
       <div class="col-md-6">
         <md-autocomplete ng-disabled="marketBrowserCtrl.form.loading" spellcheck="false"
-                         md-selected-item-change="marketBrowserCtrl.form.analysis()" flex=""
+                         md-selected-item-change="marketBrowserCtrl.form.requestAnalysis(marketBrowserCtrl.form)"
+                         flex=""
                          required="true" md-select-on-match="true" md-autoselect="true"
                          md-no-cache="marketBrowserCtrl.form.autocompleteNoCache" md-input-name="itemAutoComplete"
                          md-input-minlength="3" md-selected-item="marketBrowserCtrl.form.selectedItem"
@@ -43,10 +46,10 @@
 
   <div class="row" data-ng-if="marketBrowserCtrl.form.loading" ng-include="'loading-tpl.html'"></div>
 
-  <div class="row" data-ng-if="!marketBrowserCtrl.form.loading && marketBrowserCtrl.analysis.show">
+  <div class="row" data-ng-show="!marketBrowserCtrl.form.loading && marketBrowserCtrl.form.showAnalysis">
     <div class="col-md-12">
       <div class="shadow-sm">
-        <highchart id="chart1" config="marketBrowserCtrl.ohlc.config"></highchart>
+        <ohlc days="marketBrowserCtrl.ohlc.days"></ohlc>
       </div>
     </div>
   </div>
@@ -55,21 +58,10 @@
     <div class="col-md-12">&nbsp;</div>
   </div>
 
-  <div class="row" data-ng-if="!marketBrowserCtrl.form.loading && marketBrowserCtrl.analysis.show">
+  <div class="row" data-ng-show="!marketBrowserCtrl.form.loading && marketBrowserCtrl.form.showAnalysis">
     <div class="col-md-12">
       <div class="shadow-sm main-background">
-        <div class="row">
-          <div class="col-md-4 pull-left"><h1 class="padding">Price History</h1></div>
-          <div class="col-md-4 pull-right">
-            <md-select ng-model="marketBrowserCtrl.form.priceHistory.selectedType"
-                       ng-change="marketBrowserCtrl.form.priceHistory.onPriceHistoryTypeChange()"
-                       placeholder="Select an interval" class="md-no-underline padding">
-              <md-option ng-repeat="type in marketBrowserCtrl.form.priceHistory.types"
-                         ng-value="type.value">{{type.name}}</md-option>
-            </md-select>
-          </div>
-        </div>
-        <highchart id="priceHistoryChart" config="marketBrowserCtrl.priceHistory.config"></highchart>
+        <price-history days="marketBrowserCtrl.ohlc.days"></price-history>
       </div>
     </div>
   </div>

@@ -16,9 +16,10 @@ const marketBrowserModule = angular.module('eve.market', [
   'highcharts-ng'
 ]);
 
-const controllers = bulk(__dirname, ['./**/*-controller.js', './**/!(*index|*.spec).js']);
-const services = bulk(__dirname, ['./**/*-service.js', './**/!(*index|*.spec).js']);
-const directives = bulk(__dirname, ['./**/*-directive.js', './**/!(*index|*.spec).js']);
+const controllers = bulk(__dirname, ['./**/*-controller.js']);
+const services = bulk(__dirname, ['./**/*-service.js']);
+const directives = bulk(__dirname, ['./**/*-directive.js']);
+const components = bulk(__dirname, ['./**/*-component.js']);
 
 function declareControllers(controllerMap) {
   Object.keys(controllerMap).forEach((key) => {
@@ -69,7 +70,24 @@ function declareDirectives(directiveMap) {
   });
 }
 
+function declareComponents(componentsMap) {
+  Object.keys(componentsMap).forEach((key) => {
+    let item = componentsMap[key];
+
+    if (!item) {
+      return;
+    }
+
+    if (item.fn && typeof item.fn === 'function') {
+      marketBrowserModule.component(item.name, item.fn());
+    } else {
+      declareComponents(item);
+    }
+  });
+}
+
 declareDirectives(directives);
+declareComponents(components);
 declareServices(services);
 declareControllers(controllers);
 

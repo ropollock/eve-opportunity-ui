@@ -5,7 +5,7 @@ import './cache-service';
 const bulk = require('bulk-require');
 const cacheModule = angular.module('eve.cache', ['angularMoment']);
 
-const services = bulk(__dirname, ['./**/*-service.js', './**/!(*index|*.spec).js']);
+const services = bulk(__dirname, ['./**/*-service.js']);
 
 function declareServices(serviceMap) {
   Object.keys(serviceMap).forEach((key) => {

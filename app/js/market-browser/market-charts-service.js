@@ -28,6 +28,7 @@ function marketChartsService($timeout, $log, numbers) {
       },
       options : {
         chart: {
+          toggleModify : false,
           zoomType: 'x'
         },
         rangeSelector: {
