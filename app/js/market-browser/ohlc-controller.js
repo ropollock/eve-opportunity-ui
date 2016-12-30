@@ -1,9 +1,14 @@
-function ohlcController($scope, $log, marketChartsService, _) {
+function ohlcController($scope, marketChartsService, _) {
   'ngInject'
   const vm = this;
 
   // View model containing the configuration object for a highcharts directive
   vm.config = marketChartsService.createDefaultOHLCConfig();
+
+  vm.generateSeries = generateSeries;
+  vm.generateCandlestickSeries = generateCandlestickSeries;
+  vm.generateVolumeSeries = generateVolumeSeries;
+  vm.clearSeries = clearSeries;
 
   activate();
 

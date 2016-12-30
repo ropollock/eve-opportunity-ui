@@ -7,6 +7,10 @@ function priceHistoryController($scope, $log, marketChartsService) {
   const PRICE_HISTORY_SMA5 = 'priceHistorySMA5';
   const PRICE_HISTORY_SMA20 = 'priceHistorySMA20';
 
+  vm.PRICE_HISTORY_AVERAGE = PRICE_HISTORY_AVERAGE;
+  vm.PRICE_HISTORY_SMA5 = PRICE_HISTORY_SMA5;
+  vm.PRICE_HISTORY_SMA20 = PRICE_HISTORY_SMA20;
+
   // Form data structure
   vm.form = {
     selectedType: PRICE_HISTORY_AVERAGE,
@@ -25,6 +29,15 @@ function priceHistoryController($scope, $log, marketChartsService) {
     sma5DaySeries: [],
     sma20DaySeries: []
   };
+
+  vm.generateSeries = generateSeries;
+  vm.generateAverageSeries = generateAverageSeries;
+  vm.generateSMA5DaySeries = generateSMA5DaySeries;
+  vm.generateSMA20DaySeries = generateSMA20DaySeries;
+  vm.getDefaultType = getDefaultType;
+  vm.loadType = loadType;
+  vm.clearSeries = clearSeries;
+  vm.clearSeriesData = clearSeriesData;
 
   activate();
 

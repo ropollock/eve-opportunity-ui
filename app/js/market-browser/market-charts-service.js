@@ -1,4 +1,4 @@
-function marketChartsService($timeout, $log, numbers) {
+function marketChartsService($timeout, numbers) {
   'ngInject';
 
   const service = {};
