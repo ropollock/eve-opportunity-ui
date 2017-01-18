@@ -67,10 +67,10 @@ describe('Unit: marketChartsService', function () {
 
   it('dayToVolumeTuple formats an OHLC day into a highcharts column array', function () {
     const day = testHelper.getOHLCDays(1)[0];
-    const volumeTouple = marketChartsService.dayToVolumeTuple(day);
-    expect(volumeTouple.length).toEqual(2);
-    expect(volumeTouple[0]).toEqual(day.time);
-    expect(volumeTouple[1]).toEqual(day.avgVolume);
+    const volumeTuple = marketChartsService.dayToVolumeTuple(day);
+    expect(volumeTuple.length).toEqual(2);
+    expect(volumeTuple[0]).toEqual(day.time);
+    expect(volumeTuple[1]).toEqual(day.avgVolume);
   });
 
   it('createOHLCSeries returns a default OHLC series config', function () {
