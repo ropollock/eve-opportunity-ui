@@ -4,7 +4,8 @@ function marketChartsService($timeout, numbers) {
   const service = {};
 
   service.createDefaultOHLCConfig = createDefaultOHLCConfig;
-  service.createOHLCInterval = createOHLCInterval;
+  service.dayToOHLCInterval = dayToOHLCInterval;
+  service.dayToVolumeTuple = dayToVolumeTuple;
   service.createOHLCSeries = createOHLCSeries;
   service.createOHLCVolumeSeries = createOHLCVolumeSeries;
   service.calcMovingAvg = calcMovingAvg;
@@ -130,24 +131,15 @@ function marketChartsService($timeout, numbers) {
         valueDecimals: 1,
         valueSuffix: ' ISK',
       },
-      data: days.map((day) => {
-        return createOHLCInterval({
-          open: day.open,
-          close: day.close,
-          high: day.max,
-          low: day.min,
-          time: day.time
-        })
-      }),
+      data: days.map(dayToOHLCInterval),
       dataGrouping: {
         units: [['day', 1]]
       }
     }
   }
 
-  function createOHLCInterval(interval) {
-    let {time, high, low, open, close} = interval;
-    return [time, open, high, low, close];
+  function dayToOHLCInterval(day) {
+    return [day.time, day.open, day.max, day.min, day.close];
   }
 
   function createOHLCVolumeSeries(days) {
@@ -163,10 +155,12 @@ function marketChartsService($timeout, numbers) {
           ['day', 1]
         ]
       },
-      data: days.map((day) => {
-        return [day.time, day.avgVolume];
-      })
+      data: days.map(dayToVolumeTuple)
     };
+  }
+
+  function dayToVolumeTuple(day) {
+    return [day.time, day.avgVolume];
   }
 
   function create5DaySMASeries(days) {
