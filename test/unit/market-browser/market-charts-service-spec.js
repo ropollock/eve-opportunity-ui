@@ -97,4 +97,36 @@ describe('Unit: marketChartsService', function () {
     expect(dataGrouping.units[0].length).toEqual(2);
   });
 
+  it('should transform an array of days into an array of point averages', function () {
+    const days = testHelper.getOHLCDays(30);
+    const dayAverages = marketChartsService.daysToAverages(days);
+    expect(dayAverages.length).toBe(30);
+    dayAverages.map((each, index) => {
+      expect(each.x).toEqual(days[index].time);
+      expect(each.y).toEqual(days[index].avg);
+    });
+  });
+
+  it('should calculate a 5 day moving average array from an array of day averages', function () {
+    const dayAverages = marketChartsService.daysToAverages(testHelper.getOHLCDays(30));
+    const interval = 5;
+    const movingAverages = marketChartsService.calcMovingAvg(dayAverages, interval);
+    expect(movingAverages.length).toEqual(30);
+    const undefinedSeq = movingAverages.slice(0, 5);
+    undefinedSeq.map((each) => {
+      expect(each.y).toBe(undefined);
+    });
+    const definedSeq = movingAverages.slice(5);
+    definedSeq.map((each, index) => {
+      expect(each.y).toBeDefined();
+      expect(each.y).toEqual(marketChartsService.calcAvg(dayAverages.slice(index, index + interval)));
+    });
+  });
+
+  it('should calculate an average of an array of points', function () {
+    const points = [{x:1, y:2}, {x:2, y:4}, {x:3, y:6}, {x:4, y:8}];
+    const avg = marketChartsService.calcAvg(points);
+    expect(avg).toEqual(5);
+  });
+
 });

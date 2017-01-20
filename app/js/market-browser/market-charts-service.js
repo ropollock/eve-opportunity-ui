@@ -9,6 +9,7 @@ function marketChartsService($timeout, numbers) {
   service.createOHLCSeries = createOHLCSeries;
   service.createOHLCVolumeSeries = createOHLCVolumeSeries;
   service.calcMovingAvg = calcMovingAvg;
+  service.calcAvg = calcAvg;
   service.daysToAverages = daysToAverages;
   service.create5DaySMASeries = create5DaySMASeries;
   service.createDefaultPriceHistoryConfig = createDefaultPriceHistoryConfig;
@@ -250,28 +251,42 @@ function marketChartsService($timeout, numbers) {
     });
   }
 
+  /**
+   * calcMovingAvg
+   *
+   * Calculates an array of points where the y value is a simple moving average of n points.
+   *
+   * @param points
+   * @param n
+   * @return array
+   */
   function calcMovingAvg(points, n) {
     return points.map(function (each, index, arr) {
       const fromIndex = index - n;
-      let subSeq, sum;
 
+      // Check that there are sufficient points to calculate an average.
       if(fromIndex >= 0) {
-        // Splice the period from the array.
-        subSeq = arr.slice(fromIndex, index);
-
-        // Get sum
-        sum = subSeq.reduce(function(a, b) {
-          return a + b.y;
-        }, 0);
-
-        // Get average
-        return {x: each.x, y: sum / n};
+        // Get the average by calculating the average of the spliced period.
+        return {x: each.x, y: calcAvg(arr.slice(fromIndex, index))};
       }
       else {
-        // Insufficient data to calculate average, return undefined for that interval.
+        // Insufficient points to calculate an average, instead return undefined for that interval.
         return {x: each.x, y: undefined};
       }
     });
+  }
+
+  /**
+   * calcAvg
+   *
+   * Calculates a simple average of a point's y value from an array of points.
+   * @param points
+   * @return {number}
+   */
+  function calcAvg(points) {
+    return points.reduce((a, b) => {
+      return a + b.y;
+    }, 0) / points.length;
   }
 
   function calcMovingStdDev(points, n) {
