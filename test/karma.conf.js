@@ -16,7 +16,7 @@ const karmaBaseConfig = {
 
   browsers: ['Chrome'],
 
-  reporters: ['progress', 'coverage'],
+  reporters: ['mocha'],
 
   autoWatch: true,
 

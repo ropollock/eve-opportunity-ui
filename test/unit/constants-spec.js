@@ -5,8 +5,6 @@ describe('Unit: Constants', function() {
   beforeEach(function() {
     // instantiate the app module
     angular.mock.module('app');
-
-    // mock the directive
     angular.mock.inject((AppSettings) => {
       constants = AppSettings;
     });
@@ -18,6 +16,14 @@ describe('Unit: Constants', function() {
 
   it('should have an application name', function() {
     expect(constants.APP_TITLE).toEqual('Eve Opportunity');
+  });
+
+  it('should have an application API url', function() {
+    expect(constants.API_URL).toBeDefined();
+  });
+
+  it('should have a CREST API url', function() {
+    expect(constants.CREST_API_URL).toBeDefined();
   });
 
 });
