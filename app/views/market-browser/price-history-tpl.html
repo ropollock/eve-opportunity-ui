@@ -1,0 +1,16 @@
+<div><div class="row">
+  <div class="col-md-4 pull-left"><h1 class="padding margin-left-10">Price History</h1></div>
+  <div class="col-md-4 pull-right">
+    <md-select
+      ng-model="priceHistory.form.selectedType"
+      ng-change="priceHistory.form.loadType(priceHistory.config, priceHistory.data,
+      priceHistory.form.selectedType)"
+      placeholder="Select an interval" class="md-no-underline padding">
+      <md-option ng-repeat="type in priceHistory.form.types"
+                 ng-value="type.value">{{type.name}}
+      </md-option>
+    </md-select>
+  </div>
+</div>
+<highchart id="priceHistoryChart" config="priceHistory.config"></highchart>
+</div>

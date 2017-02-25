@@ -3,7 +3,7 @@ import angular from 'angular';
 const bulk = require('bulk-require');
 const crestModule = angular.module('eve.crest', []);
 
-const services = bulk(__dirname, ['./**/*-service.js', './**/!(*index|*.spec).js']);
+const services = bulk(__dirname, ['./**/*-service.js']);
 
 function declareServices(serviceMap) {
   Object.keys(serviceMap).forEach((key) => {

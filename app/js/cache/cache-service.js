@@ -1,6 +1,5 @@
 function cacheService(moment, CACHE_CONSTANTS) {
   'ngInject';
-
   const service = {};
 
   service.get = get;
@@ -31,7 +30,6 @@ function cacheService(moment, CACHE_CONSTANTS) {
     let obj = {
       data: data
     };
-
     obj[CACHE_CONSTANTS.PREFIX + CACHE_CONSTANTS.EXPIRES_VARIABLE] = moment().add(duration, durationUnit).unix();
     localStorage.setItem(CACHE_CONSTANTS.PREFIX + key, JSON.stringify(obj));
   }

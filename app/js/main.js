@@ -1,4 +1,5 @@
 import angular from 'angular';
+let numbers = require('numbers');
 let lodash = require('lodash');
 
 // angular modules
@@ -21,6 +22,7 @@ window.app = angular.module('app', requires);
 
 angular.module('app').constant('AppSettings', constants);
 angular.module('app').constant('_', lodash);
+angular.module('app').constant('numbers', numbers);
 angular.module('app').config(onConfig);
 angular.module('app').run(onRun);
 

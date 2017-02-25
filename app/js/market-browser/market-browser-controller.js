@@ -1,34 +1,35 @@
-function marketBrowserController($scope, $log, $timeout, marketBrowserService, apiService, crestAPIService, $q, marketChartsService) {
+function marketBrowserController($scope, $log, marketBrowserService, apiService, crestAPIService, $q) {
   'ngInject'
-
   const vm = this;
+
+  // Event constants
   const EVENT_QUERY_ANALYSIS = 'eventQueryAnalysis';
   const EVENT_ANALYSIS_COMPLETE = 'eventAnalysisComplete';
   const EVENT_ANALYSIS_SUCCESSFUL = 'eventAnalysisSuccessful';
   const EVENT_ANALYSIS_FAILED = 'eventAnalysisFailed';
   const EVENT_INVALID_QUERY = 'eventInvalidQuery';
 
+  // Contains form data for the market browser
   vm.form = {
     loading: true,
     marketTypes: [],
     itemSearchText: '',
     selectedItem: null,
-    queryItems: query => {return marketBrowserService.queryItems(query, vm.form.marketTypes)},
     tradeHubs: [],
     tradeHubSearchText: '',
     selectedTradeHub: null,
+    showAnalysis: false,
+    queryItems: query => {return marketBrowserService.queryItems(query, vm.form.marketTypes)},
     queryTradeHubs: query => {return marketBrowserService.queryTradeHubs(query, vm.form.tradeHubs)},
-    analysis: analysis
+    requestAnalysis: requestAnalysis
   };
 
-  vm.analysis = {
-    show: false
-  };
-
+  // Contains the most recent request for OHLC data from eve op API
   vm.ohlc = {
-    config: marketChartsService.createDefaultOHLCConfig()
+    days: []
   };
 
+  // Contains persisting initialization values for the market browser
   vm.init = {
     marketTypePageCount: 1,
     initCalls: 0,
@@ -39,7 +40,6 @@ function marketBrowserController($scope, $log, $timeout, marketBrowserService, a
   activate();
 
   function activate() {
-    $log.info('Activating MarketBrowserController.');
     initEvents();
     initMarketTypes();
     initTradeHubs();
@@ -56,7 +56,7 @@ function marketBrowserController($scope, $log, $timeout, marketBrowserService, a
   function onQueryAnalysis() {
     $scope.$on(EVENT_QUERY_ANALYSIS, () => {
       vm.form.loading = true;
-      vm.analysis.show = false;
+      vm.form.showAnalysis = false;
     });
   }
 
@@ -68,39 +68,37 @@ function marketBrowserController($scope, $log, $timeout, marketBrowserService, a
 
   function onAnalysisSuccessful() {
     $scope.$on(EVENT_ANALYSIS_SUCCESSFUL, () => {
-      vm.analysis.show = true;
+      vm.form.showAnalysis = true;
     });
   }
 
   function onAnalysisFailed() {
-    $scope.$on(EVENT_ANALYSIS_FAILED, (err) => {
-      $log.error(err);
+    $scope.$on(EVENT_ANALYSIS_FAILED, (error) => {
+      $log.error(error);
       // @TODO show error state
-      $log.error('Unable to query OHLC for : ' + error.item + ' : ' + error.tradeHub + ' ' + JSON.stringify(error.error));
     })
   }
 
   function onInvalidQuery() {
     $scope.$on(EVENT_INVALID_QUERY, () => {
-      vm.analysis.show = false;
+      vm.form.showAnalysis = false;
     });
   }
 
+  // @TODO make this more pure
   function checkMarketBrowserLoaded() {
     if(vm.init.initCalls >= vm.init.initCallCount) {
-      $log.info('Market types have been loaded.');
       vm.form.loading = false;
-
       if(vm.form.tradeHubs.length > 0) {
         marketBrowserService.cacheTradeHubs(vm.form.tradeHubs);
       }
-
       if(vm.form.marketTypes.length > 0) {
         marketBrowserService.cacheMarketTypes(vm.form.marketTypes);
       }
     }
   }
 
+  // @TODO make this more pure
   function initTradeHubs() {
     let cachedTradeHubs = marketBrowserService.getCachedTradeHubs();
     if(cachedTradeHubs !== null) {
@@ -120,7 +118,7 @@ function marketBrowserController($scope, $log, $timeout, marketBrowserService, a
         });
     }
   }
-
+  // @TODO make this more pure
   function initMarketTypes() {
     let cachedMarketTypes = marketBrowserService.getCachedMarketTypes();
     if(cachedMarketTypes !== null) {
@@ -130,56 +128,48 @@ function marketBrowserController($scope, $log, $timeout, marketBrowserService, a
     }
     else {
       crestAPIService.getAllMarketTypes(1)
-        .success(success)
-        .error(error);
-    }
+        .success((response) => {
+          vm.init.marketTypePageCount = response.pageCount;
+          vm.init.initCallCount += vm.init.marketTypePageCount-1;
+          vm.init.initCalls += 1;
 
-    function success(response) {
-      vm.init.marketTypePageCount = response.pageCount;
-      vm.init.initCallCount += vm.init.marketTypePageCount-1;
-      vm.init.initCalls += 1;
+          let itemsToAdd = [];
 
-      let itemsToAdd = [];
+          response.items.forEach(function(item) {
+            itemsToAdd.push(item.type);
+          });
 
-      response.items.forEach(function(item) {
-        itemsToAdd.push(item.type);
-      });
+          vm.form.marketTypes = vm.form.marketTypes.concat(itemsToAdd);
 
-      vm.form.marketTypes = vm.form.marketTypes.concat(itemsToAdd);
-
-      if(response.pageCount > 1) {
-        loadAdditionalMarketTypePages();
-      }
-      else {
-        checkMarketBrowserLoaded();
-      }
-    }
-
-    function error(response) {
-      $log.error('initMarketTypes CREST error: ' + JSON.stringify(response));
+          if(response.pageCount > 1) {
+            loadAdditionalMarketTypePages();
+          }
+          else {
+            checkMarketBrowserLoaded();
+          }
+        })
+        .error((response) => {
+          $log.error('initMarketTypes CREST error: ' + JSON.stringify(response));
+        });
     }
   }
 
   function loadAdditionalMarketTypePages() {
     for(let i = 2; i <= vm.init.marketTypePageCount; i++) {
       vm.init.marketTypePromises.push(crestAPIService.getAllMarketTypes(i)
-        .success(success)
-        .error(error));
-    }
+        .success((response) => {
+          vm.init.initCalls += 1;
+          let itemsToAdd = [];
 
-    function success(response) {
-      vm.init.initCalls += 1;
-      let itemsToAdd = [];
+          response.items.forEach(function(item) {
+            itemsToAdd.push(item.type);
+          });
 
-      response.items.forEach(function(item) {
-        itemsToAdd.push(item.type);
-      });
-
-      vm.form.marketTypes = vm.form.marketTypes.concat(itemsToAdd);
-    }
-
-    function error(response) {
-      $log.error('CREST error: ' + JSON.stringify(response));
+          vm.form.marketTypes = vm.form.marketTypes.concat(itemsToAdd);
+        })
+        .error((response) => {
+          $log.error('CREST error: ' + JSON.stringify(response));
+        }));
     }
 
     // Await outstanding market type queries
@@ -188,81 +178,82 @@ function marketBrowserController($scope, $log, $timeout, marketBrowserService, a
     });
   }
 
+  /**
+   * isQueryReady
+   *
+   * Checks that an item and a trade hub are selected in the form.
+   *
+   * @param {Object} form
+   * @returns boolean
+   */
   function isQueryReady(form) {
     let {selectedItem, selectedTradeHub} = form;
     return (selectedItem && selectedTradeHub);
   }
 
-  function analysis() {
-    if(!isQueryReady(vm.form)) {
+  /**
+   * requestAnalysis
+   *
+   * Performs an analysis lifecycle that requests OHLC data from Eve Opportunity API and updates
+   * the view model with the OHLC days. A check of isQueryReady is performed before analysis.
+   * If this check fails, a broadcast of EVENT_INVALID_QUERY event will occur and then return.
+   *
+   * @param {Object} form
+   * @return void
+   */
+  function requestAnalysis(form) {
+    if(!isQueryReady(form)) {
+      // Fire invalid query event and no op
       $scope.$broadcast(EVENT_INVALID_QUERY);
       return;
     }
 
+    // Pull out the item ID and trade hub name from the form.
+    let {id: itemId} = form.selectedItem;
+    let {name: tradeHubName} = form.selectedTradeHub;
+
+    // Fire query analysis event
     $scope.$broadcast(EVENT_QUERY_ANALYSIS);
-    let {selectedItem, selectedTradeHub} = vm.form;
 
-    // Request an OHLC resource for the selected item and trade hub
-    apiService.getOHLC(selectedItem.id, selectedTradeHub.name)
+    requestOHLC(itemId, tradeHubName)
       .success((response) => {
-        $log.debug(response);
-        if(response.days) {
-          // Reset series
-          vm.ohlc.config.series = [];
-          // Use the OHLC resource data to create a highstock candlestick chart
-          vm.ohlc.config.series.push({
-            type: 'candlestick',
-            name: 'OHLC',
-            tooltip: {
-              valueDecimals: 1,
-              valueSuffix: ' ISK',
-            },
-            data: response.days.map((day) => {
-              return marketChartsService.createOHLCInterval({
-                open: day.open,
-                close: day.close,
-                high: day.max,
-                low: day.min,
-                time: day.time
-              })
-            }),
-            dataGrouping: {
-              units: [
-                ['day', 1]
-              ]
-            }
-          });
-
-          // Add average volume chart
-          vm.ohlc.config.series.push({
-            type: 'column',
-            name: 'Average Volume',
-            yAxis: 1,
-            tooltip: {
-              valueDecimals: 1
-            },
-            dataGrouping: {
-              units: [
-                ['day', 1]
-              ]
-            },
-            data: response.days.map((day) => {
-              return [day.time, day.avgVolume];
-            })
-          });
-
-          $scope.$broadcast(EVENT_ANALYSIS_SUCCESSFUL);
-        }
-        else {
-          // @TODO log error
-          throw new Error('Unable to build OHLC chart from OHLC response. Response:' + response);
-        }
+        // Update OHLC days data
+        vm.ohlc.days = response.days;
+        // Fire analysis successful event
+        $scope.$broadcast(EVENT_ANALYSIS_SUCCESSFUL);
       })
       .error((error) => {
-        $scope.$broadcast(EVENT_ANALYSIS_FAILED, {error: error, item: selectedItem.id, tradeHub: selectedItem.id});
+        $log.error('Error requesting OHLC data from API.', error);
+        // Fire analysis failed event
+        $scope.$broadcast(EVENT_ANALYSIS_FAILED, {error: error, item: itemId, tradeHub: tradeHubName});
       })
       .finally(() => {
+        // Fire analysis complete event
         $scope.$broadcast(EVENT_ANALYSIS_COMPLETE);
+      });
+  }
+
+  /**
+   * requestOHLC
+   *
+   * Takes an itemId and tradeHubName then returns an api request promise for OHLC data.
+   * OHLC data events are emitted upon success or failure of the request.
+   *
+   * @return promise
+   * @param {String} itemId
+   * @param {String} tradeHubName
+   */
+  function requestOHLC(itemId, tradeHubName) {
+      // Request an OHLC resource for the selected item and trade hub
+    return apiService.getOHLC(itemId, tradeHubName)
+      .success((response) => {
+        if(response.days) {
+          return {item: itemId, tradeHub: tradeHubName, response: response};
+        }
+        else {
+          return $q.reject(new Error('Unable to build OHLC chart from OHLC response. Response:'
+            + JSON.stringify(response)));
+        }
       });
   }
 }
