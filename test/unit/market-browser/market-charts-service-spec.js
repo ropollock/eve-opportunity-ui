@@ -73,6 +73,22 @@ describe('Unit: marketChartsService', function () {
     expect(volumeTuple[1]).toEqual(day.avgVolume);
   });
 
+  it('daysToUpperStd formats an OHLC day into a highcharts line array', function () {
+    const day = testHelper.getOHLCDays(1);
+    const upperStd = marketChartsService.daysToUpperStdDev(day);
+    expect(upperStd.length).toEqual(1);
+    expect(upperStd[0].x).toEqual(day[0].time);
+    expect(upperStd[0].y).toEqual(day[0].stdDevBounds.upper);
+  });
+
+  it('daysToLowerStd formats an OHLC day into a highcharts line array', function () {
+    const day = testHelper.getOHLCDays(1);
+    const lowerStd = marketChartsService.daysToUpperStdDev(day);
+    expect(lowerStd.length).toEqual(1);
+    expect(lowerStd[0].x).toEqual(day[0].time);
+    expect(lowerStd[0].y).toEqual(day[0].stdDevBounds.lower);
+  });
+
   it('createOHLCSeries returns a default OHLC series config', function () {
     const days = testHelper.getOHLCDays(30);
     const ohlcSeries = marketChartsService.createOHLCSeries(days);
@@ -107,6 +123,12 @@ describe('Unit: marketChartsService', function () {
     });
   });
 
+  it('should calculate an average of an array of points', function () {
+    const points = [{x:1, y:2}, {x:2, y:4}, {x:3, y:6}, {x:4, y:8}];
+    const avg = marketChartsService.calcAvg(points);
+    expect(avg).toEqual(5);
+  });
+
   it('should calculate a 5 day moving average array from an array of day averages', function () {
     const dayAverages = marketChartsService.daysToAverages(testHelper.getOHLCDays(30));
     const interval = 5;
@@ -121,12 +143,6 @@ describe('Unit: marketChartsService', function () {
       expect(each.y).toBeDefined();
       expect(each.y).toEqual(marketChartsService.calcAvg(dayAverages.slice(index, index + interval)));
     });
-  });
-
-  it('should calculate an average of an array of points', function () {
-    const points = [{x:1, y:2}, {x:2, y:4}, {x:3, y:6}, {x:4, y:8}];
-    const avg = marketChartsService.calcAvg(points);
-    expect(avg).toEqual(5);
   });
 
 });

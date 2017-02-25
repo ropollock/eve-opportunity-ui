@@ -5,12 +5,14 @@ function marketChartsService($timeout, numbers) {
 
   service.createDefaultOHLCConfig = createDefaultOHLCConfig;
   service.dayToOHLCInterval = dayToOHLCInterval;
-  service.dayToVolumeTuple = dayToVolumeTuple;
   service.createOHLCSeries = createOHLCSeries;
   service.createOHLCVolumeSeries = createOHLCVolumeSeries;
   service.calcMovingAvg = calcMovingAvg;
   service.calcAvg = calcAvg;
+  service.dayToVolumeTuple = dayToVolumeTuple;
   service.daysToAverages = daysToAverages;
+  service.daysToUpperStdDev = daysToUpperStdDev;
+  service.daysToLowerStdDev = daysToLowerStdDev;
   service.create5DaySMASeries = create5DaySMASeries;
   service.createDefaultPriceHistoryConfig = createDefaultPriceHistoryConfig;
   service.createAverageSeries = createAverageSeries;
