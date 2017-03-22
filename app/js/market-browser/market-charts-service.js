@@ -253,6 +253,10 @@ function marketChartsService($timeout, numbers) {
     });
   }
 
+  function invalidSeries(points) {
+    return points.some((p) => {return !p.y;});
+  }
+
   /**
    * calcMovingAvg
    *
@@ -265,11 +269,16 @@ function marketChartsService($timeout, numbers) {
   function calcMovingAvg(points, n) {
     return points.map(function (each, index, arr) {
       const fromIndex = index - n;
+      let slice = arr.slice(fromIndex, index);
 
       // Check that there are sufficient points to calculate an average.
-      if(fromIndex >= 0) {
+      if(fromIndex >= 0 && !invalidSeries(slice)) {
+        /*if(!invalidSeries(slice)) {
+          return {x: each.x, y: undefined};
+        }*/
+
         // Get the average by calculating the average of the spliced period.
-        return {x: each.x, y: calcAvg(arr.slice(fromIndex, index))};
+        return {x: each.x, y: calcAvg(slice)};
       }
       else {
         // Insufficient points to calculate an average, instead return undefined for that interval.
@@ -295,12 +304,12 @@ function marketChartsService($timeout, numbers) {
     return points.map((each, index, arr) => {
       const fromIndex = index -n;
 
-      if(fromIndex >= 0) {
-        // Splice the period from the array.
-        let subSeq = arr.slice(fromIndex, index).map((point) => {
-          return point.y;
-        });
+      // Splice the period from the array.
+      let subSeq = arr.slice(fromIndex, index).map((point) => {
+        return point.y;
+      });
 
+      if(fromIndex >= 0 && !subSeq.some((p) => {return !p})) {
         // Get standard deviation
         const stdDev = numbers.statistic.standardDev(subSeq);
 
