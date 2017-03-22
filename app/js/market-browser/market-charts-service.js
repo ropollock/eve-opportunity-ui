@@ -273,10 +273,6 @@ function marketChartsService($timeout, numbers) {
 
       // Check that there are sufficient points to calculate an average.
       if(fromIndex >= 0 && !invalidSeries(slice)) {
-        /*if(!invalidSeries(slice)) {
-          return {x: each.x, y: undefined};
-        }*/
-
         // Get the average by calculating the average of the spliced period.
         return {x: each.x, y: calcAvg(slice)};
       }
