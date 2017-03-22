@@ -95,7 +95,7 @@ describe('Unit: priceHistoryController', function() {
     priceHistoryCtrl.config.series = priceHistoryCtrl.data.averageSeries;
     expect(priceHistoryCtrl.data.averageSeries.length).toBeDefined();
     expect(priceHistoryCtrl.config.series).toEqual(priceHistoryCtrl.data.averageSeries);
-    priceHistoryCtrl.loadType(priceHistoryCtrl.config, priceHistoryCtrl.data, "something incorrect");
+    priceHistoryCtrl.loadType(priceHistoryCtrl.config, priceHistoryCtrl.data, 'something incorrect');
     expect(priceHistoryCtrl.config.series).toEqual(priceHistoryCtrl.data.averageSeries);
   });
 
